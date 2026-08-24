@@ -6,13 +6,7 @@ import type { SurfaceApi } from './state'
 import { isDiff } from './guards'
 
 /* ---------- helpers ---------- */
-const NOW = new Date('2026-08-23T10:20:00Z').getTime()
-export function when(iso: string) {
-  const d = new Date(iso).getTime(), h = Math.round((NOW - d) / 36e5)
-  if (h < 0) return 'Just now'
-  if (h < 24) return h < 1 ? 'Just now' : `${h}h ago`
-  return new Date(iso).toLocaleDateString('en-GB', { weekday: 'short' })
-}
+import { when } from './time'
 const label = (a: Action) => a.kind === 'approve' ? (a.label || 'Approve') : a.kind === 'approveAlways' ? `Always · ${a.scope}` : a.kind === 'edit' ? 'Edit' : a.kind === 'discard' ? 'Discard' : 'Answer'
 const tip = (a: Action) => a.kind === 'approve' ? `${a.label || 'Approve'} · A` : a.kind === 'approveAlways' ? `Hand off ${a.scope}` : a.kind === 'edit' ? 'Edit first · E' : 'Throw away · X'
 const icon = (a: Action) => a.kind === 'approve' ? <Icon.send /> : a.kind === 'approveAlways' ? <Icon.always /> : a.kind === 'edit' ? <Icon.pen /> : <Icon.trash />

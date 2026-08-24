@@ -4,21 +4,23 @@ import type { WorkBlock } from './contract/work-block'
 import { useSurface } from './state'
 import { Intro, Card, Stack, Bundle, Handoff, Composer, Empty, Skeleton } from './components'
 import { isEvidence } from './guards'
+import { greeting, introSub, todayLabel } from './time'
 
 const q = new URLSearchParams(location.search)
 const DAY = (q.get('day') === 'heavy' ? 'heavy' : 'light') as 'light' | 'heavy'
 const FORCE_EMPTY = q.get('empty') === '1'
 
+const HELLO = greeting()          // Morning · Afternoon · Evening
 const COPY = {
   light: {
-    sub: 'Wednesday · 8:20',
-    greeting: 'Morning, Summer. Three things need you, one before Thursday.',
-    brief: "Morning. Three things need you, one before Daniel's board meets Thursday.",
-    done: "That's everything for this morning.",
+    sub: introSub(),
+    greeting: `${HELLO}, Summer. Three things need you, one before Thursday.`,
+    brief: `${HELLO}. Three things need you, one before Daniel's board meets Thursday.`,
+    done: "That's everything for now.",
     next: "Nothing needs you. Next I'm drafting Friday's report.",
   },
   heavy: {
-    sub: 'Tuesday · 8:40 · back from four days away',
+    sub: introSub('back from four days away'),
     greeting: "Welcome back, Summer. Thirty-one things came in, I've grouped them for you.",
     brief: "Welcome back. Thirty-one things came in while you were away. I've grouped what I could, twelve are the same gap in the March sheet, eight are routine pipeline updates. Four are about Daniel, and three I'd like you to look at properly.",
     done: "That's everything. I'll send the weekly report at 9.",
@@ -32,6 +34,7 @@ export default function App() {
   const [ready, setReady] = useState(q.get('skipintro') === '1')
   const [loading, setLoading] = useState(q.get('loading') === '1')
   const c = COPY[DAY]
+  const today = todayLabel()
 
   useEffect(() => { document.body.classList.add(DAY); if (ready) document.body.classList.add('ready') }, [ready])
   useEffect(() => { if (loading) { const t = setTimeout(() => setLoading(false), 900); return () => clearTimeout(t) } }, [loading])
@@ -88,7 +91,7 @@ export default function App() {
     <>
       {!ready && <Intro sub={c.sub} greeting={c.greeting} onBegin={() => setReady(true)} />}
       <main className="page">
-        <div className="top"><h1>Today</h1>{DAY === 'light' && <span className="date">Wed <b>· Aug 23</b></span>}</div>
+        <div className="top"><h1>Today</h1><span className="date">{today.weekday} <b>· {today.date}</b></span></div>
         <p className="brief"><span className="spark" aria-hidden="true"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1l1.6 4.4L14 7l-4.4 1.6L8 13l-1.6-4.4L2 7l4.4-1.6z" /></svg></span><span>{allDone ? c.done : c.brief}</span></p>
         {total === 0 ? null : DAY === 'light'
           ? <div className="progress"><div className="dots">{items.map((w, i) => <i key={w.id} className={i < doneCount ? '' : 'off'} />)}</div><span className="count">{doneCount} of {total} done</span></div>
