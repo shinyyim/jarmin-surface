@@ -6,8 +6,8 @@ Every open question gets resolved here rather than deferred. Newest at the botto
 ---
 
 ### D-001 · Deadline unknown
-**Assumption:** Plan is phase-based, not date-based. Phase 1 (the system) is protected; the
-explorations and the build polish absorb any time pressure.
+**Assumption:** Plan is phase-based, not date-based. Phase 1 (the system) is protected; Phase 2
+explorations and Phase 4 build polish absorb any time pressure.
 **Revisit if:** a due date is confirmed.
 
 ### D-002 · Stack — settled
