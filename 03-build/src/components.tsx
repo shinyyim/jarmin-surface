@@ -101,7 +101,7 @@ export function Card({ wb, api, nested }: { wb: WorkBlock; api: SurfaceApi; nest
   return (
     <article className={`item ${isRegistered(wb.body) ? '' : 'attn'} ${nested ? 'nested' : ''}`} id={wb.id} data-urgency={wb.urgency} data-open={s.open} data-state={s.state} data-edit={s.edit} data-thinking={s.thinking} tabIndex={0}>
       <div className="head" onClick={() => api.toggle(wb.id)}>
-        <span className="ico" data-tip={wb.source}><SourceIcon source={wb.source} /></span>
+        <span className="ico"><SourceIcon source={wb.source} /></span>
         <div className="row1"><span className="src">{wb.source}</span><span className="dot" /><span>{when(wb.raisedAt)}</span>{wb.urgency === 'now' && <span className="chip">Now</span>}</div>
         <span className="chev"><Icon.chev /></span>
         <div className="title">{wb.title}</div><div className="why">{wb.why}</div>
@@ -159,7 +159,7 @@ export function Stack({ id, title, items, api }: { id: string; title: string; it
   return (
     <article className="item stack" data-open={open && !allDone} data-state={gone ? 'gone' : allDone ? 'done' : 'waiting'}>
       <div className="head" onClick={() => setOpen(o => !o)}>
-        <span className="ico" data-tip={first.source}><SourceIcon source={first.source} /></span>
+        <span className="ico"><SourceIcon source={first.source} /></span>
         <div className="row1"><span className="src">{first.source}</span><span className="dot" /><span>{n} · same pattern</span></div>
         <span className="chev"><Icon.chev /></span>
         <div className="title">{title}</div><div className="why">{first.why}</div>
