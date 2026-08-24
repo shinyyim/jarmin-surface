@@ -10,8 +10,8 @@ client admin: enquiry → proposal → contract → kickoff → invoice → paym
 eleven clients, in Gmail, Monday.com and a revenue sheet. Summer checks the surface with coffee
 at 8:40 on a laptop, and from a phone between meetings. Two mornings decided the design: a
 Wednesday with three things waiting, and a Tuesday back from four days away with thirty-one.
-If a visit takes more than a few minutes, or asks him to understand how the assistant works, he
-stops opening it.
+If a visit takes more than a few minutes, or asks them to understand how the assistant works, they
+stop opening it.
 
 ## The hardest call I had to make
 Whether approving a drafted email and answering a question about a blank cell belong in the

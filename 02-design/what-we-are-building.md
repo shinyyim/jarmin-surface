@@ -22,20 +22,20 @@ No sidebar. No tabs. No split view. No settings.
 
 ## The person, and the day
 
-**Summer** owns an eleven-person consultancy. She is not technical and has no
-interest in becoming technical. She has had an AI assistant for six weeks. It
-drafts her email, keeps Monday.com and a revenue sheet current, and sends her a
+**Summer** owns an eleven-person consultancy, is not technical, and has no
+interest in becoming technical. They have had an AI assistant for six weeks. It
+drafts their email, keeps Monday.com and a revenue sheet current, and sends their a
 summary each morning.
 
-She opens this surface with coffee, around 8:40. If it takes more than a few
-minutes she stops opening it.
+They open this surface with coffee, around 8:40. If it takes more than a few
+minutes they stop opening it.
 
-**The light day.** A normal Wednesday. Three things waiting. She reads each one
+**The light day.** A normal Wednesday. Three things waiting. They read each one
 properly, approves two, answers one, and closes the tab in four minutes.
 
 **The heavy day.** Tuesday, back from four days at a conference. Thirty-one
 things have piled up. Twelve of them are the same spreadsheet gap repeated
-twelve times. This is the day that decides whether she keeps using the product.
+twelve times. This is the day that decides whether they keep using the product.
 
 Both days are in `system/fixtures.ts` and both are reachable in the build.
 
@@ -67,7 +67,7 @@ The body swaps by kind. Everything around it stays identical.
   message being replied to. Enough to judge whether it should go out.
 - **diff** — where it lives, the value today, the value proposed. One row per
   field, because a change can involve several at once.
-- **evidence** — the question, and everything the AI already found, so she never
+- **evidence** — the question, and everything the AI already found, so they never
   opens another tool to answer it.
 - **fallback** — a kind with no renderer. Shows the envelope, says plainly that
   it can't display this kind of work yet, and still offers the actions.

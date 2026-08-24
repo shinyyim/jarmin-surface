@@ -4,7 +4,7 @@ Record at 1440×900 in Chrome, cursor visible. Read the italics aloud or leave s
 
 | Time | Do | Say |
 |---|---|---|
-| 0:00 | Open `/` | *This is the only place Summer and his AI employee meet. It speaks first.* |
+| 0:00 | Open `/` | *This is the only place Summer and the AI employee working for them meet. It speaks first.* |
 | 0:08 | Slide to begin | *Three things this morning. One is due before Thursday.* |
 | 0:15 | Open card 1, scroll the email | *The work itself, in full. Recipient, subject, body, and what Daniel sent.* |
 | 0:25 | Type "too formal, mention Thursday" in the reply box, wait for rewrite | *Pushing back happens under the draft. The draft rewrites in place, no thread.* |
