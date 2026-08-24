@@ -4,6 +4,8 @@ status: final
 
 # Notes on the thinking
 
+**Live:** https://jarmin-surface.vercel.app · **Code:** https://github.com/shinyyim/jarmin-surface
+
 ## Who I pictured using this
 Summer, who owns an eleven-person consultancy and is not technical. The AI employee runs the
 client admin: enquiry → proposal → contract → kickoff → invoice → payment → renewal, across all

@@ -3,7 +3,7 @@
 A web surface for one person and the AI employee working for them. Everything the AI needs
 from the person, and everything the person wants to say back, happens here.
 
-**Live:** see the deploy link in the repo description · **Explorations:** `/explorations/README.html` · **Phone + desktop side by side:** `/compare.html`
+**Live:** https://jarmin-surface.vercel.app · **Directions tried:** [`/explorations/README.html`](https://jarmin-surface.vercel.app/explorations/README.html) · **Phone + desktop:** [`/compare.html`](https://jarmin-surface.vercel.app/compare.html)
 
 ## Run
 

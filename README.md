@@ -4,6 +4,8 @@ A web surface where a person and the AI employee working for them get things don
 Everything the AI employee needs from that person, and everything that person wants to say back,
 happens here.
 
+**Live:** https://jarmin-surface.vercel.app · [the light day](https://jarmin-surface.vercel.app/) · [the heavy day](https://jarmin-surface.vercel.app/?day=heavy) · [directions tried](https://jarmin-surface.vercel.app/explorations/README.html) · [phone and desktop](https://jarmin-surface.vercel.app/compare.html)
+
 **Start here:** [`04-writeup/notes.md`](04-writeup/notes.md) — who this is for, the hardest call, what was left out, tools used.
 
 | Path | What's in it |
