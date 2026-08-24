@@ -20,10 +20,11 @@ export function when(iso: string) {
 }
 
 /** `?hour=21` forces a time of day, for demos and for seeing the greeting change. */
-const FORCED = Number(new URLSearchParams(location.search).get('hour'))
+const RAW = new URLSearchParams(location.search).get('hour')
+const FORCED = RAW === null || RAW === '' ? null : Number(RAW)
 const now = () => {
   const d = new Date(NOW)
-  if (!Number.isNaN(FORCED) && FORCED >= 0 && FORCED <= 23) d.setHours(FORCED)
+  if (FORCED !== null && Number.isInteger(FORCED) && FORCED >= 0 && FORCED <= 23) d.setHours(FORCED)
   return d
 }
 
