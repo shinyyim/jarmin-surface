@@ -220,7 +220,7 @@
   /* sparkle, a pulse on the dots, a passing sheen on the count and chip */
   @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(217,93,68,.38) } 70% { box-shadow: 0 0 0 9px rgba(217,93,68,0) } 100% { box-shadow: 0 0 0 0 rgba(217,93,68,0) } }
   .top h1::before { animation: pulse 3.2s cubic-bezier(.2,.7,.2,1) infinite; box-shadow: none }
-  @media (prefers-reduced-motion: reduce) { .top h1::before, .item[data-urgency="now"] .ico::after { animation: none } }
+  @media (prefers-reduced-motion: reduce) { .top h1::before { animation: none } }
 
   /* ---------- intro, the assistant speaks first ---------- */
   .intro { position: fixed; inset: 0; z-index: 40; display: grid; place-items: center; background: var(--bg); transition: opacity .5s var(--ease), visibility .5s; padding: 24px }
@@ -561,7 +561,7 @@
   /* sparkle, a pulse on the dots, a passing sheen on the count and chip */
   @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(217,93,68,.38) } 70% { box-shadow: 0 0 0 9px rgba(217,93,68,0) } 100% { box-shadow: 0 0 0 0 rgba(217,93,68,0) } }
   .top h1::before { animation: pulse 3.2s cubic-bezier(.2,.7,.2,1) infinite; box-shadow: none }
-  @media (prefers-reduced-motion: reduce) { .top h1::before, .item[data-urgency="now"] .ico::after { animation: none } }
+  @media (prefers-reduced-motion: reduce) { .top h1::before { animation: none } }
 
   /* editing */
   .item[data-edit="true"] .content, .item[data-edit="true"] .fields div i[contenteditable] { cursor: text }
