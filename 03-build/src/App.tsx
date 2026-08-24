@@ -72,7 +72,7 @@ export default function App() {
     window.addEventListener('keydown', onKey); return () => window.removeEventListener('keydown', onKey)
   })
 
-  // Sections: the assistant's grouping, not a time axis (D-008)
+  // Sections: the assistant's grouping, not a time axis (D-007)
   const sections = useMemo(() => {
     const byGroup = (k: string) => items.filter(w => w.groupKey === k)
     const carriedIds = new Set(days.light.map(w => w.id))

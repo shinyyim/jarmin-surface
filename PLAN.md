@@ -48,10 +48,10 @@ This is the highest-leverage phase. Do not skip ahead to layout.
       reply, a calendar conflict, a contract clause, a Slack escalation). Render each with only the
       primitives above. Any type that needs a fifth primitive means the set is wrong — fix it here,
       not in code.
-- [x] **Trust model** → settled in `DECISIONS.md` D-003 and built: `approveAlways` carries a named
+- [x] **Trust model** → settled in `DECISIONS.md` D-002 and built: `approveAlways` carries a named
       scope, and the hand-off line at the top can be switched off. No settings screen.
 - [x] **Interruption model** → `urgency` is set by the assistant, never the person, and grouping is
-      the model on a heavy day: twelve pings become one row. See D-008.
+      the model on a heavy day: twelve pings become one row. See D-007.
 
 **Exit:** I can hand someone the schema and they can render a work type I never designed for.
 
@@ -89,7 +89,7 @@ Each direction gets its own folder under `02-design/explorations/` with a sketch
 ### Phase 4 — Build
 > "Does the surface you built match the surface you designed?"
 
-- [x] Scaffold in `03-build/` — **Vite + React + TypeScript**, hand-written CSS (see D-002)
+- [x] Scaffold in `03-build/` — **Vite + React + TypeScript**, hand-written CSS (see D-001)
 - [x] Fake data in a single fixtures file, shaped exactly like the Work Block schema
 - [x] Renderer registry: `type → component`. Adding a work type = adding one entry, nothing else
 - [x] A deliberately unregistered type in the fixtures, to prove the fallback renders
