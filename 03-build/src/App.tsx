@@ -36,7 +36,7 @@ export default function App() {
   const c = COPY[DAY]
   const today = todayLabel()
 
-  useEffect(() => { document.body.classList.add(DAY); if (ready) document.body.classList.add('ready') }, [ready])
+  useEffect(() => { document.body.classList.add(DAY); document.body.classList.toggle('ready', ready) }, [ready])
   useEffect(() => { if (loading) { const t = setTimeout(() => setLoading(false), 900); return () => clearTimeout(t) } }, [loading])
   useEffect(() => {
     const set = () => document.body.classList.toggle('phone', window.innerWidth < 640)
@@ -60,6 +60,7 @@ export default function App() {
       const target = open ?? waiting.find(w => w.id === focused) ?? waiting[0]
       if (!target) return
       if (e.key === 'j' || e.key === 'k') { const els = [...document.querySelectorAll<HTMLElement>('.item[data-state="waiting"]')]; const i = els.findIndex(x => x === document.activeElement); els[Math.max(0, Math.min(els.length - 1, i + (e.key === 'j' ? 1 : -1)))]?.focus() }
+      if (e.key === 'Escape') { if (open) api.toggle(open.id); else setReady(false); return }
       if (e.key === 'Enter') api.toggle(target.id)
       if (e.key === 'a') api.approve(target)
       if (e.key === 'e') api.edit(target.id)
@@ -92,7 +93,7 @@ export default function App() {
       {!ready && <Intro sub={c.sub} greeting={c.greeting} onBegin={() => setReady(true)} />}
       <main className="page">
         <div className="top"><h1>Today</h1><span className="date">{today.weekday} <b>· {today.date}</b></span></div>
-        <p className="brief"><span className="spark" aria-hidden="true"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1l1.6 4.4L14 7l-4.4 1.6L8 13l-1.6-4.4L2 7l4.4-1.6z" /></svg></span><span>{allDone ? c.done : c.brief}</span></p>
+        <p className="brief"><button className="spark" data-tip="Back to the start · esc" aria-label="Back to the start" onClick={() => setReady(false)}><svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1l1.6 4.4L14 7l-4.4 1.6L8 13l-1.6-4.4L2 7l4.4-1.6z" /></svg></button><span>{allDone ? c.done : c.brief}</span></p>
         {total === 0 ? null : DAY === 'light'
           ? <div className="progress"><div className="dots">{items.map((w, i) => <i key={w.id} className={i < doneCount ? '' : 'off'} />)}</div><span className="count">{doneCount} of {total} done</span></div>
           : <div className="bar"><div className="track"><i style={{ width: `${total ? doneCount / total * 100 : 0}%` }} /></div><span className="n"><b>{doneCount}</b> of {total}</span></div>}
