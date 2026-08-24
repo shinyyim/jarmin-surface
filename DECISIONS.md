@@ -5,6 +5,11 @@ Every open question gets resolved here rather than deferred. Newest at the botto
 
 ---
 
+### D-001 · Deadline unknown
+**Assumption:** Plan is phase-based, not date-based. Phase 1 (the system) is protected; the
+explorations and the build polish absorb any time pressure.
+**Revisit if:** a due date is confirmed.
+
 ### D-002 · Stack — settled
 **Call:** Vite + React + TypeScript, static fixtures, no backend. Styles are hand-written CSS with
 design tokens at the top, ported from the prototype. No utility framework, no component kit.
