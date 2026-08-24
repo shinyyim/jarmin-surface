@@ -19,7 +19,13 @@ export function when(iso: string) {
   return d.toLocaleDateString('en-GB', { weekday: 'short' })
 }
 
-const now = () => new Date(NOW)
+/** `?hour=21` forces a time of day, for demos and for seeing the greeting change. */
+const FORCED = Number(new URLSearchParams(location.search).get('hour'))
+const now = () => {
+  const d = new Date(NOW)
+  if (!Number.isNaN(FORCED) && FORCED >= 0 && FORCED <= 23) d.setHours(FORCED)
+  return d
+}
 
 /** "Sun · 15 Feb" for the header. */
 export const todayLabel = () => ({
@@ -30,7 +36,11 @@ export const todayLabel = () => ({
 /** The assistant says the time of day, not the hour. */
 export const greeting = () => {
   const h = now().getHours()
-  return h < 12 ? 'Morning' : h < 18 ? 'Afternoon' : 'Evening'
+  if (h < 5) return 'Late one'
+  if (h < 12) return 'Morning'
+  if (h < 18) return 'Afternoon'
+  if (h < 22) return 'Evening'
+  return 'Late one'
 }
 
 /** "SUNDAY · 14:32" above the greeting, plus anything the day wants to add. */
