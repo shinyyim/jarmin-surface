@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>D · Clean</title>
+<style>
+  :root {
+    --bg: #f2f2f2;
+    --card: #ffffff;
+    --card-2: #f7f7f7;
+    --hair: rgba(0,0,0,.07);
+    --hair-2: rgba(0,0,0,.11);
+    --ink: #0a0a0a;
+    --ink-2: #6b6b70;
+    --ink-3: #a3a3a8;
+    --black: #111111;
+    --red: #ff3b30;
+    --green: #34c759;
+    --blue: #0a84ff;
+    --font: -apple-system, "SF Pro Text", "SF Pro Display", "Helvetica Neue", system-ui, sans-serif;
+    --r: 20px;
+    --r-s: 12px;
+    --shadow: 0 1px 2px rgba(0,0,0,.03), 0 8px 24px -16px rgba(0,0,0,.12);
+    --shadow-2: 0 2px 6px rgba(0,0,0,.06), 0 18px 40px -20px rgba(0,0,0,.18);
+    --ease: cubic-bezier(.2,.7,.2,1);
+    --col: 600px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0 }
+  html { -webkit-text-size-adjust: 100% }
+  body { background: var(--bg); color: var(--ink); font-family: var(--font); font-size: 15px; line-height: 1.4; -webkit-font-smoothing: antialiased; letter-spacing: -.01em; min-height: 100vh }
+  button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; letter-spacing: inherit; -webkit-tap-highlight-color: transparent }
+  input { font: inherit; color: inherit; background: none; border: 0; outline: 0; letter-spacing: inherit }
+
+  .page { max-width: var(--col); margin: 0 auto; padding: 56px 20px 150px }
+  body.phone .page { padding: 20px 14px 120px }
+
+  /* ---------- Header ---------- */
+  .top { display: flex; align-items: baseline; justify-content: space-between; padding: 0 4px; margin-bottom: 6px }
+  .top h1 { font-size: 24px; font-weight: 700; letter-spacing: -.02em; display: flex; align-items: center; gap: 8px }
+  .top h1::before { content: ""; width: 9px; height: 9px; border-radius: 50%; background: var(--red) }
+  .top .date { font-size: 15px; color: var(--ink-3); font-weight: 500 } .top .date b { color: var(--ink-2); font-weight: 600 }
+  .brief { padding: 0 4px; color: var(--ink-2); font-size: 15px; line-height: 1.45; max-width: 46ch; transition: opacity .3s }
+  .brief.fade { opacity: 0 }
+  .progress { display: flex; align-items: center; gap: 10px; padding: 14px 4px 22px }
+  .progress .dots { display: flex; gap: 6px }
+  .progress .dots i { width: 8px; height: 8px; border-radius: 50%; background: var(--black); transition: background .3s, transform .3s }
+  .progress .dots i.off { background: rgba(0,0,0,.12) }
+  .progress .count { font-size: 13px; color: var(--ink-3); font-weight: 500 }
+
+  /* ---------- Cards ---------- */
+  .list { display: flex; flex-direction: column; gap: 10px }
+  .item { background: var(--card); border-radius: var(--r); box-shadow: 0 0 0 1px var(--hair), var(--shadow); overflow: hidden; transition: box-shadow .25s, transform .35s var(--ease), opacity .35s; animation: rise .45s var(--ease) both }
+  .item:nth-child(2) { animation-delay: 60ms } .item:nth-child(3) { animation-delay: 120ms }
+  @keyframes rise { from { opacity: 0; transform: translateY(8px) } }
+  .item[data-open="true"] { box-shadow: 0 0 0 1px var(--hair-2), var(--shadow-2) }
+  .item[data-state="gone"] { opacity: 0; transform: scale(.98); max-height: 0; margin-top: -10px; overflow: hidden; box-shadow: none }
+
+  .head { padding: 16px 18px 14px; cursor: pointer; user-select: none }
+  .row1 { display: flex; align-items: center; gap: 10px; margin-bottom: 6px }
+  .src { font-size: 12px; font-weight: 600; color: var(--ink-3); letter-spacing: .02em; text-transform: uppercase }
+  .src::after { content: "·"; margin: 0 6px; color: var(--ink-3) }
+  .when { font-size: 12px; font-weight: 500; color: var(--ink-3) }
+  .urg { margin-left: auto; font-size: 12px; font-weight: 600; color: var(--red); display: none; align-items: center; gap: 5px }
+  .urg::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor }
+  .item[data-urgency="now"] .urg { display: inline-flex }
+  .chev { margin-left: auto; width: 16px; height: 16px; color: var(--ink-3); transition: transform .35s var(--ease) }
+  .item[data-urgency="now"] .chev { margin-left: 8px }
+  .item[data-open="true"] .chev { transform: rotate(180deg) }
+  .title { font-size: 17px; font-weight: 600; letter-spacing: -.02em; line-height: 1.3 }
+  .why { font-size: 14.5px; color: var(--ink-2); margin-top: 3px; line-height: 1.4 }
+
+  .quick { display: flex; gap: 8px; margin-top: 14px }
+  .item[data-open="true"] .quick { display: none }
+
+  /* Buttons — one black pill, greys for the rest */
+  .btn { height: 38px; padding: 0 16px; border-radius: 999px; font-size: 14px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; transition: transform .12s, background .15s, box-shadow .15s, opacity .15s }
+  .btn:active { transform: translateY(1px) scale(.985) }
+  .btn.black { background: linear-gradient(180deg, #2a2a2a, #0e0e0e); color: #fff; box-shadow: inset 0 1px 0 rgba(255,255,255,.14), 0 1px 2px rgba(0,0,0,.25), 0 6px 14px -8px rgba(0,0,0,.5) }
+  .btn.black:hover { background: linear-gradient(180deg, #333, #111) }
+  .btn.grey { background: linear-gradient(180deg, #ffffff, #f3f3f3); color: var(--ink); box-shadow: inset 0 1px 0 #fff, 0 0 0 1px rgba(0,0,0,.07), 0 1px 2px rgba(0,0,0,.06), 0 6px 14px -10px rgba(0,0,0,.25) }
+  .btn.grey:hover { background: linear-gradient(180deg, #ffffff, #ececec) }
+  .btn.grey:active { box-shadow: inset 0 1px 3px rgba(0,0,0,.12), 0 0 0 1px rgba(0,0,0,.08) }
+  .btn.text { padding: 0 8px; color: var(--ink-2) }
+  .btn.text:hover { color: var(--red) }
+  .btn.wide { flex: 1; justify-content: center }
+  body.phone .quick .btn { height: 40px; flex: 1; justify-content: center }
+
+  /* ---------- Expanded body ---------- */
+  .body { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .4s var(--ease) }
+  .item[data-open="true"] .body { grid-template-rows: 1fr }
+  .body > div { overflow: hidden }
+  .work { border-top: 1px solid var(--hair); padding: 16px 18px 6px }
+  .label { font-size: 11.5px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; color: var(--ink-3) }
+
+  /* document */
+  .fields { display: grid; grid-template-columns: max-content 1fr; gap: 6px 14px; font-size: 13.5px; padding-bottom: 14px; border-bottom: 1px dashed var(--hair-2); margin-bottom: 14px }
+  .fields dt { color: var(--ink-3); font-weight: 500 } .fields dd { color: var(--ink); font-weight: 500 }
+  .content { white-space: pre-wrap; font-size: 16px; line-height: 1.5; letter-spacing: -.012em }
+  .context { margin-top: 16px; background: var(--card-2); border-radius: var(--r-s); padding: 12px 14px; font-size: 14px; color: var(--ink-2); line-height: 1.45 }
+  .context .label { display: block; margin-bottom: 4px }
+
+  /* diff */
+  .path { font-size: 13px; color: var(--ink-2); font-weight: 500; margin-bottom: 12px; display: flex; align-items: center; gap: 6px }
+  .path svg { width: 12px; height: 12px; color: var(--ink-3) }
+  .change { display: grid; grid-template-columns: 96px 1fr; gap: 6px 12px; align-items: center; padding: 10px 0; border-top: 1px solid var(--hair) }
+  .change:first-of-type { border-top: 0 }
+  .change .f { font-size: 13px; color: var(--ink-3); font-weight: 500 }
+  .change .vals { display: flex; align-items: center; gap: 8px; flex-wrap: wrap }
+  .pill { height: 28px; padding: 0 11px; border-radius: 999px; font-size: 13.5px; font-weight: 600; display: inline-flex; align-items: center }
+  .pill.before { background: rgba(0,0,0,.05); color: var(--ink-3); text-decoration: line-through }
+  .pill.before.is-empty { text-decoration: none; font-style: italic; font-weight: 500 }
+  .pill.after { background: var(--black); color: #fff }
+  .change .arr { width: 14px; height: 14px; color: var(--ink-3) }
+  body.phone .change { grid-template-columns: 1fr; gap: 4px }
+
+  /* evidence */
+  .question { font-size: 17px; font-weight: 600; letter-spacing: -.02em; margin-bottom: 12px }
+  .found { display: flex; flex-direction: column }
+  .found > div { display: grid; grid-template-columns: 110px 1fr; gap: 12px; padding: 9px 0; border-top: 1px solid var(--hair); font-size: 14px }
+  .found > div:first-child { border-top: 0 }
+  .found .k { color: var(--ink-3); font-weight: 500; font-size: 13px; padding-top: 1px }
+  .found .v.long { grid-column: 1 / -1; background: var(--card-2); border-radius: var(--r-s); padding: 10px 12px; color: var(--ink-2); font-style: italic }
+  body.phone .found > div { grid-template-columns: 1fr; gap: 2px }
+  .seg { display: flex; background: #ececec; border-radius: 999px; padding: 4px; margin-top: 14px; gap: 2px; box-shadow: inset 0 1px 2px rgba(0,0,0,.08), inset 0 0 0 1px rgba(0,0,0,.03) }
+  .seg button { flex: 1; height: 36px; border-radius: 999px; font-size: 14px; font-weight: 600; color: var(--ink-2); transition: background .15s, color .15s, box-shadow .15s, transform .15s }
+  .seg button:hover { color: var(--ink) }
+  .seg button:active, .seg button.on { background: linear-gradient(180deg, #fff, #f6f6f6); color: var(--ink); box-shadow: inset 0 1px 0 #fff, 0 1px 2px rgba(0,0,0,.12), 0 4px 10px -6px rgba(0,0,0,.25) }
+
+  /* fallback */
+  .fallback { display: flex; gap: 12px; align-items: flex-start; background: var(--card-2); border-radius: var(--r-s); padding: 12px 14px; font-size: 14px; color: var(--ink-2) }
+  .fallback b { color: var(--ink); font-weight: 600; display: block; margin-bottom: 2px }
+
+  .actions { display: flex; gap: 8px; align-items: center; padding: 12px 18px 0; flex-wrap: wrap }
+  /* slide to confirm — the one deliberate gesture on the surface */
+  .slide { --w: 220px; --k: 34px; position: relative; width: var(--w); height: 42px; border-radius: 999px; background: #ebebeb; box-shadow: inset 0 1px 3px rgba(0,0,0,.10), inset 0 0 0 1px rgba(0,0,0,.04); overflow: hidden; user-select: none; touch-action: pan-y; flex: none }
+  body.phone .slide { --w: 100%; width: 100% }
+  .slide .fill { position: absolute; inset: 0; width: 0; background: linear-gradient(180deg, #4cd964, #2fb653); border-radius: 999px; transition: width .05s linear }
+  .slide .txt { position: absolute; inset: 0; display: grid; place-items: center; font-size: 14px; font-weight: 600; color: var(--ink-2); padding-left: var(--k); pointer-events: none; transition: opacity .2s }
+  .slide .txt.on { color: #fff; opacity: 0 }
+  .slide .knob { position: absolute; top: 4px; left: 4px; width: var(--k); height: var(--k); border-radius: 50%; background: linear-gradient(180deg, #fff, #f2f2f2); box-shadow: inset 0 1px 0 #fff, 0 1px 3px rgba(0,0,0,.18), 0 4px 10px -4px rgba(0,0,0,.3); display: grid; place-items: center; color: var(--ink-2); cursor: grab; transition: left .05s linear, background .2s, color .2s }
+  .slide .knob:active { cursor: grabbing }
+  .slide .knob svg { width: 14px; height: 14px }
+  .slide.is-done { pointer-events: none }
+  .slide.is-done .fill { width: 100%; transition: width .25s var(--ease) }
+  .slide.is-done .txt { opacity: 0 } .slide.is-done .txt.on { opacity: 1 }
+  .slide.is-done .knob { left: calc(100% - var(--k) - 4px); color: #2fb653; transition: left .25s var(--ease), color .2s }
+  .slide.snap .fill, .slide.snap .knob { transition: width .25s var(--ease), left .25s var(--ease) }
+  .btn.text:hover { color: var(--red) }
+  .actions .spacer { flex: 1 }
+  body.phone .actions .btn.black, body.phone .actions .btn.grey { flex: 1; justify-content: center }
+
+  /* reply — inside the card */
+  .thread { display: flex; flex-direction: column; gap: 6px; padding: 12px 18px 0; font-size: 14px }
+  .thread .me { align-self: flex-end; background: var(--black); color: #fff; padding: 8px 12px; border-radius: 16px 16px 4px 16px; max-width: 80% }
+  .thread .ai { align-self: flex-start; background: var(--card-2); color: var(--ink); padding: 8px 12px; border-radius: 16px 16px 16px 4px; max-width: 85% }
+  .reply { margin: 12px 18px 18px; display: flex; align-items: center; gap: 8px; background: var(--card-2); border-radius: 999px; padding: 4px 4px 4px 14px; height: 40px }
+  .reply input { flex: 1; font-size: 14.5px; min-width: 0 }
+  .reply input::placeholder { color: var(--ink-3) }
+  .reply button { width: 32px; height: 32px; border-radius: 50%; background: var(--black); color: #fff; display: grid; place-items: center }
+  .reply button svg { width: 14px; height: 14px }
+
+  /* ---------- Done ---------- */
+  .item[data-state="done"] .head, .item[data-state="done"] .body { display: none }
+  .item[data-state="done"] { background: var(--card-2); box-shadow: 0 0 0 1px var(--hair) }
+  .done { display: none; align-items: center; gap: 10px; padding: 12px 18px; font-size: 14.5px; font-weight: 500; color: var(--ink-2) }
+  .item[data-state="done"] .done { display: flex }
+  .done .check { width: 20px; height: 20px; border-radius: 50%; background: var(--green); color: #fff; display: grid; place-items: center; animation: pop .3s cubic-bezier(.2,1.4,.4,1) both }
+  .done .check svg { width: 11px; height: 11px }
+  @keyframes pop { from { transform: scale(.4); opacity: 0 } }
+  .done .done-msg { color: var(--ink) }
+  .done .undo { margin-left: auto; font-weight: 600; color: var(--ink-2); padding: 4px 8px; border-radius: 8px }
+  .done .undo:hover { background: rgba(0,0,0,.05); color: var(--ink) }
+
+  /* ---------- Empty ---------- */
+  .empty { text-align: center; padding: 56px 20px 0; opacity: 0; transition: opacity .4s; pointer-events: none }
+  .empty.show { opacity: 1 }
+  .empty .ghost { display: flex; flex-direction: column; gap: 0; width: 220px; margin: 0 auto 28px; opacity: .55 }
+  .empty .ghost i { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px dashed var(--hair-2) }
+  .empty .ghost i:last-child { border: 0 }
+  .empty .ghost i::before { content: ""; width: 16px; height: 16px; border-radius: 5px; border: 1.5px solid var(--hair-2) }
+  .empty .ghost i::after { content: ""; flex: 1; height: 10px; border-radius: 5px; background: rgba(0,0,0,.06) }
+  .empty h2 { font-size: 17px; font-weight: 700; letter-spacing: -.02em; margin-bottom: 4px }
+  .empty p { font-size: 14.5px; color: var(--ink-2); max-width: 30ch; margin: 0 auto }
+
+  /* ---------- Composer — the black pill ---------- */
+  .composer { position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%); width: min(var(--col), calc(100% - 40px)); z-index: 20; transition: opacity .2s, transform .35s var(--ease) }
+  body.phone .composer { bottom: max(14px, env(safe-area-inset-bottom)); width: calc(100% - 28px) }
+  body.has-open .composer { opacity: 0; transform: translate(-50%, 10px); pointer-events: none }
+  .composer form { background: linear-gradient(180deg, #fff, #fafafa); color: var(--ink); border-radius: 999px; height: 54px; display: flex; align-items: center; padding: 0 8px 0 20px; gap: 10px; box-shadow: inset 0 1px 0 #fff, 0 0 0 1px rgba(0,0,0,.06), 0 2px 4px rgba(0,0,0,.04), 0 18px 40px -16px rgba(0,0,0,.28) }
+  .composer .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--black); flex: none; animation: breathe 2.6s ease-in-out infinite }
+  @keyframes breathe { 0%,100% { transform: scale(1); opacity: .9 } 50% { transform: scale(.7); opacity: .45 } }
+  .composer input { flex: 1; font-size: 15px; min-width: 0 }
+  .composer input::placeholder { color: var(--ink-3) }
+  .composer kbd { font: 600 12px/1 var(--font); color: var(--ink-3); background: #f0f0f0; border-radius: 7px; padding: 6px 8px; box-shadow: inset 0 -1px 0 rgba(0,0,0,.06); letter-spacing: 0 }
+  .composer button { width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(180deg, #2a2a2a, #0e0e0e); color: #fff; display: grid; place-items: center; flex: none; box-shadow: inset 0 1px 0 rgba(255,255,255,.14), 0 1px 2px rgba(0,0,0,.3) }
+  .composer button svg { width: 16px; height: 16px }
+
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0) }
+</style>
+</head>
+<body>
+<main class="page">
+  <div class="top"><h1>Today</h1><span class="date"><b>Wed,</b> Aug 23</span></div>
+  <p class="brief" id="brief">Morning. Three things need you — one before Daniel's board meets Thursday.</p>
+  <div class="progress"><div class="dots" id="dots"></div><span class="count" id="count">0 of 3 done</span></div>
+  <section class="list" id="stack" aria-label="Things that need you"></section>
+  <div class="empty" id="empty">
+    <div class="ghost"><i></i><i></i><i></i></div>
+    <h2>It's pretty quiet around here</h2>
+    <p>Nothing needs you. Next I'm drafting Friday's report.</p>
+  </div>
+</main>
+
+<div class="composer"><form id="composer"><span class="dot" aria-hidden="true"></span><input id="composerInput" placeholder="Tell it something…" aria-label="Instruction"><kbd>enter</kbd><button type="submit" aria-label="Send"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 13V3M4 7l4-4 4 4"/></svg></button></form></div>
+
+<script src="_fixtures.js"></script>
+<script>
+const I = {
+  chev: `<svg class="chev" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6l4 4 4-4"/></svg>`,
+  arr: `<svg class="arr" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg>`,
+  check: `<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6.5l2.5 2.5L10 3.5"/></svg>`,
+  crumb: `<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 2.5L8 6l-3.5 3.5"/></svg>`,
+  up: `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 13V3M4 7l4-4 4 4"/></svg>`,
+  arrR: `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg>`,
+};
+const R = {
+  document: b => `<div class="work"><dl class="fields">${b.fields.map(f=>`<dt>${esc(f.label)}</dt><dd>${esc(f.value)}</dd>`).join('')}</dl><div class="content">${esc(b.content)}</div>${b.context?`<div class="context"><span class="label">${esc(b.context.label)}</span>${esc(b.context.content)}</div>`:''}</div>`,
+  diff: b => `<div class="work"><div class="path">${b.path.map(p=>esc(p)).join(I.crumb)}</div>${b.changes.map(c=>`<div class="change"><span class="f">${esc(c.field)}</span><span class="vals"><span class="pill before ${c.before===null?'is-empty':''}">${c.before===null?'empty':esc(c.before)}</span>${I.arr}<span class="pill after">${esc(c.after)}</span></span></div>`).join('')}</div>`,
+  evidence: b => `<div class="work"><div class="question">${esc(b.question)}</div><div class="found">${b.found.map(f=>`<div><span class="k">${esc(f.label)}</span><span class="v ${f.long?'long':''}">${esc(f.value)}</span></div>`).join('')}</div>${b.options?`<div class="seg">${b.options.map(o=>`<button data-answer="${esc(o)}">${esc(o)}</button>`).join('')}</div>`:''}</div>`,
+};
+const fallback = b => `<div class="work"><div class="fallback"><span>⚠︎</span><div><b>I can't show this kind of work here yet.</b>${esc(JSON.stringify(b.data ?? ''))}</div></div></div>`;
+const label = a => ({approve:a.label||'Approve', approveAlways:`Always for ${a.scope}`, edit:'Edit', discard:'Discard'}[a.kind]);
+
+const stack = document.getElementById('stack');
+stack.innerHTML = LIGHT_DAY.map(wb => {
+  const isQ = wb.body.kind === 'evidence';
+  const quick = isQ ? `<button class="btn black" data-act="open">Answer</button>`
+    : wb.actions.filter(a=>a.kind==='approve'||a.kind==='edit').map(a=>`<button class="btn ${a.kind==='approve'?'black':'grey'}" data-act="${a.kind}">${label(a)}</button>`).join('');
+  return `<article class="item" id="${wb.id}" data-urgency="${wb.urgency}" data-open="false" data-state="waiting">
+    <div class="head">
+      <div class="row1"><span class="src">${esc(wb.source)}</span><span class="when">${esc(wb.raisedAt)}</span><span class="urg">Before Thu</span>${I.chev}</div>
+      <div class="title">${esc(wb.title)}</div><div class="why">${esc(wb.why)}</div>
+      <div class="quick">${quick}</div>
+    </div>
+    <div class="body"><div>
+      ${(R[wb.body.kind]||fallback)(wb.body)}
+      <div class="actions">${wb.actions.filter(a=>a.kind!=='answer').map(a=>a.kind==='discard'?`<span class="spacer"></span><button class="btn text" data-act="discard">Discard</button>`:a.kind==='approve'?`<div class="slide" data-slide><div class="fill"></div><div class="txt">Slide to ${(a.label||'approve').toLowerCase().replace(' it','')}</div><div class="txt on">${a.label||'Approved'} ✓</div><div class="knob">${I.arrR}</div></div>`:`<button class="btn grey" data-act="${a.kind}">${label(a)}</button>`).join('')}</div>
+      <div class="thread" hidden></div>
+      <form class="reply"><input placeholder="Tell it something about this…" aria-label="Reply"><button type="submit" aria-label="Send">${I.up}</button></form>
+    </div></div>
+    <div class="done"><span class="check">${I.check}</span><span class="done-msg"></span><button class="undo">Undo</button></div>
+  </article>`;
+}).join('');
+
+/* progress dots */
+const dots = document.getElementById('dots'), count = document.getElementById('count');
+function progress() {
+  const all = [...stack.children]; const done = all.filter(c => c.dataset.state !== 'waiting').length;
+  dots.innerHTML = all.map((_, i) => `<i class="${i < done ? '' : 'off'}"></i>`).join('');
+  count.textContent = `${done} of ${all.length} done`;
+  document.body.classList.toggle('has-open', all.some(c => c.dataset.open === 'true' && c.dataset.state === 'waiting'));
+}
+new MutationObserver(progress).observe(stack, { attributes: true, subtree: true, attributeFilter: ['data-state', 'data-open'] });
+progress();
+
+wire({ stack, brief: document.getElementById('brief'), floor: document.getElementById('empty'),
+  briefDone: `That's everything for this morning.` });
+
+/* slide to confirm */
+stack.addEventListener('pointerdown', e => {
+  const knob = e.target.closest('.slide .knob'); if (!knob) return;
+  const slide = knob.parentElement, item = slide.closest('.item');
+  const k = knob.offsetWidth, max = slide.offsetWidth - k - 8, x0 = e.clientX; let x = 0;
+  slide.classList.remove('snap'); knob.setPointerCapture(e.pointerId);
+  const move = ev => { x = Math.max(0, Math.min(max, ev.clientX - x0)); knob.style.left = (4 + x) + 'px'; slide.querySelector('.fill').style.width = (x + k + 8) + 'px'; slide.querySelector('.txt').style.opacity = 1 - x / max; };
+  const up = () => {
+    knob.removeEventListener('pointermove', move); knob.removeEventListener('pointerup', up); knob.removeEventListener('pointercancel', up);
+    if (x >= max * 0.85 || x < 4) { slide.classList.add('is-done'); knob.style.left = ''; slide.querySelector('.fill').style.width = ''; slide.querySelector('.txt').style.opacity = '';
+      setTimeout(() => { const w = LIGHT_DAY.find(w => w.id === item.id); item.dataset.open = 'false'; item.dataset.state = 'done'; item.querySelector('.done-msg').textContent = w.done; timers_.set(item.id, setTimeout(() => { item.dataset.state = 'gone'; setTimeout(() => { if (![...stack.children].some(c => c.dataset.state === 'waiting')) { document.getElementById('brief').textContent = "That's everything for this morning."; document.getElementById('empty').classList.add('show'); } }, 500) }, 6000)); }, 520);
+    } else { slide.classList.add('snap'); knob.style.left = ''; slide.querySelector('.fill').style.width = ''; slide.querySelector('.txt').style.opacity = ''; }
+  };
+  knob.addEventListener('pointermove', move); knob.addEventListener('pointerup', up); knob.addEventListener('pointercancel', up);
+});
+const timers_ = new Map();
+stack.addEventListener('click', e => { if (e.target.closest('.undo')) { const it = e.target.closest('.item'); clearTimeout(timers_.get(it.id)); it.querySelector('.slide')?.classList.remove('is-done'); } });
+
+document.getElementById('composer').addEventListener('submit', e => {
+  e.preventDefault(); const i = document.getElementById('composerInput'); if (!i.value.trim()) return;
+  i.value = ''; i.placeholder = 'On it…'; setTimeout(() => { i.placeholder = 'Done — anything else?'; setTimeout(() => i.placeholder = 'Tell it something…', 2500) }, 900);
+});
+</script>
+</body>
+</html>

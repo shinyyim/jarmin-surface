@@ -1,0 +1,5 @@
+{
+  "buildCommand": "cd 03-build && npm install && npm run build",
+  "outputDirectory": "03-build/dist",
+  "installCommand": "echo skip"
+}

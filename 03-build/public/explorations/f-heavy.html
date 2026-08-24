@@ -1,0 +1,642 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>F · Heavy day</title>
+<style>
+  :root {
+    --bg: #fbfbfb;
+    --ink: #17181b;
+    --ink-2: #6e7176;
+    --ink-3: #a6a9ae;
+    --line: rgba(0,0,0,.05);
+    --dock: rgba(244,244,245,.9);
+    --dock-2: rgba(238,238,240,.95);
+    --white: #fff;
+    --dark: #3a3c42;
+    --red: #d95d44; --red-glow: rgba(217,93,68,.32); --red-soft: rgba(217,93,68,.10);
+    --green: #30d158;
+    --font: -apple-system, "SF Pro Text", "SF Pro Display", "Helvetica Neue", system-ui, sans-serif;
+    --r: 24px;
+    --r-s: 14px;
+    --blur: blur(20px) saturate(150%);
+    --soft: 0 1px 2px rgba(20,22,26,.03), 0 18px 48px -22px rgba(20,22,26,.16);
+    --soft-2: 0 2px 6px rgba(20,22,26,.05), 0 30px 70px -26px rgba(20,22,26,.26);
+    --bloom: 0 1px 2px rgba(20,22,26,.06), 0 10px 24px -8px rgba(20,22,26,.22);
+    --ease: cubic-bezier(.2,.8,.2,1);
+    --spring: cubic-bezier(.34,1.45,.44,1);
+    --col: 600px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0 }
+  html { -webkit-text-size-adjust: 100% }
+  body { background: var(--bg); color: var(--ink); font-family: var(--font); font-size: 15px; line-height: 1.4; -webkit-font-smoothing: antialiased; letter-spacing: -.012em; min-height: 100vh; overflow-x: hidden }
+  body::before { content: ""; position: fixed; inset: -10%; z-index: -1; pointer-events: none; background: radial-gradient(40% 30% at 30% 10%, #fff, transparent 70%), radial-gradient(30% 24% at 80% 30%, rgba(228,232,238,.7), transparent 70%), radial-gradient(30% 26% at 55% 90%, rgba(238,232,226,.6), transparent 70%); filter: blur(24px) }
+  button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; letter-spacing: inherit; -webkit-tap-highlight-color: transparent }
+  input { font: inherit; color: inherit; background: none; border: 0; outline: 0; letter-spacing: inherit }
+  svg { display: block }
+
+  .page { max-width: var(--col); margin: 0 auto; padding: 60px 20px 170px }
+  body.phone .page { padding: 22px 14px 130px }
+
+  /* ---------- tooltip (the little floating label from the reference) ---------- */
+  [data-tip] { position: relative }
+  [data-tip]::after { content: attr(data-tip); position: absolute; left: 50%; bottom: calc(100% + 10px); transform: translate(-50%, 6px) scale(.96); background: var(--white); color: var(--ink); font-size: 12.5px; font-weight: 600; letter-spacing: -.01em; padding: 7px 11px; border-radius: 11px; white-space: nowrap; box-shadow: var(--bloom); opacity: 0; pointer-events: none; transition: opacity .18s, transform .28s var(--spring); z-index: 5 }
+  [data-tip]:hover::after { opacity: 1; transform: translate(-50%, 0) scale(1) }
+  [data-tip] kbd { display: none }
+  body.phone [data-tip]::after { display: none }
+
+  /* ---------- Header ---------- */
+  .top { display: flex; align-items: center; justify-content: space-between; padding: 0 6px; margin-bottom: 8px }
+  .top h1 { font-size: 26px; font-weight: 700; letter-spacing: -.03em; display: flex; align-items: center; gap: 10px }
+  .top h1::before { content: ""; width: 10px; height: 10px; border-radius: 50%; background: var(--red); box-shadow: 0 0 0 4px var(--red-soft) }
+  .top .date { font-size: 13.5px; color: var(--ink-2); font-weight: 600; background: var(--white); padding: 7px 12px; border-radius: 999px; box-shadow: var(--bloom) } .top .date b { color: var(--ink-3); font-weight: 500 }
+  .brief { padding: 0 6px; color: var(--ink-2); font-size: 15px; line-height: 1.45; max-width: none; transition: opacity .3s; display: flex; gap: 10px; align-items: flex-start }
+  .brief .spark { flex: none; width: 22px; height: 22px; border-radius: 50%; background: var(--dark); color: #fff; display: grid; place-items: center; margin-top: 1px; box-shadow: var(--bloom) }
+  .brief .spark svg { width: 12px; height: 12px }
+  .brief.fade { opacity: 0 }
+  .progress { display: flex; align-items: center; gap: 10px; padding: 16px 6px 24px }
+  .progress .dots { display: inline-flex; gap: 6px; padding: 7px 10px; background: var(--white); border-radius: 999px; box-shadow: var(--bloom) }
+  .progress .dots i { width: 8px; height: 8px; border-radius: 50%; background: var(--ink); transition: background .35s, transform .35s var(--spring) }
+  .progress .dots i.off { background: rgba(0,0,0,.10) }
+  .progress .count { font-size: 13px; color: var(--ink-3); font-weight: 500 }
+
+  /* ---------- Cards ---------- */
+  .list { display: flex; flex-direction: column; gap: 14px }
+  .item { position: relative; background: var(--white); border-radius: var(--r); box-shadow: var(--soft); overflow: hidden; transition: box-shadow .35s var(--ease), transform .45s var(--ease), opacity .35s; animation: rise .6s var(--ease) both }
+  .item:nth-child(2) { animation-delay: 70ms } .item:nth-child(3) { animation-delay: 140ms }
+  @keyframes rise { from { opacity: 0; transform: translateY(10px) scale(.99) } }
+  .item:hover { box-shadow: var(--soft-2) }
+  .item[data-open="true"] { box-shadow: var(--soft-2); transform: translateY(-1px) }
+  .item[data-state="gone"] { opacity: 0; transform: scale(.98); max-height: 0; margin-top: -14px; overflow: hidden; box-shadow: none }
+
+  .head { display: grid; grid-template-columns: 44px 1fr auto; gap: 4px 14px; padding: 16px 16px 14px 16px; cursor: pointer; user-select: none; align-items: start }
+  body.phone .head { grid-template-columns: 40px 1fr auto; padding: 14px 14px 12px }
+  /* source icon, the dock icon */
+  .ico { grid-row: 1 / span 2; width: 44px; height: 44px; border-radius: 14px; background: var(--dock); display: grid; place-items: center; color: var(--ink-2); box-shadow: inset 0 1px 0 #fff, 0 0 0 1px rgba(0,0,0,.03); transition: transform .3s var(--spring), background .2s, color .2s }
+  body.phone .ico { width: 40px; height: 40px; border-radius: 12px }
+  .ico svg { width: 20px; height: 20px }
+  .item:hover .ico { transform: translateY(-2px) rotate(-3deg); background: var(--white); box-shadow: var(--bloom); color: var(--ink) }
+  .item[data-urgency="now"] .ico::after { content: ""; position: absolute; top: -3px; right: -3px; width: 10px; height: 10px; border-radius: 50%; background: var(--red); box-shadow: 0 0 0 2px #fff }
+  .ico { position: relative }
+  .row1 { grid-column: 2; display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--ink-3); font-weight: 500 }
+  .row1 .src { font-weight: 600; color: var(--ink-2) }
+  .row1 .dot { width: 3px; height: 3px; border-radius: 50%; background: currentColor; opacity: .6 }
+  .row1 .chip { display: inline-flex; align-items: center; gap: 5px; height: 20px; padding: 0 8px; border-radius: 999px; background: var(--red-soft); color: var(--red); font-weight: 600; font-size: 11.5px }
+  .row1 .chip::before { content: ""; width: 5px; height: 5px; border-radius: 50%; background: currentColor }
+  .title { grid-column: 2; font-size: 17px; font-weight: 600; letter-spacing: -.022em; line-height: 1.3; margin-top: 2px }
+  .why { grid-column: 2; font-size: 14.5px; color: var(--ink-2); margin-top: 2px; line-height: 1.42 }
+  .chev { grid-column: 3; grid-row: 1; width: 26px; height: 26px; border-radius: 50%; background: var(--dock); display: grid; place-items: center; color: var(--ink-3); transition: transform .45s var(--spring), background .2s }
+  .chev svg { width: 13px; height: 13px }
+  .item:hover .chev { background: var(--dock-2) }
+  .item[data-open="true"] .chev { transform: rotate(180deg) }
+
+  /* ---------- the action dock ---------- */
+  .dock { grid-column: 2 / span 2; display: inline-flex; align-items: center; gap: 2px; padding: 3px; margin-top: 12px; background: var(--dock); border-radius: 999px; box-shadow: inset 0 1px 0 #fff, inset 0 0 0 1px rgba(0,0,0,.02); justify-self: start }
+  body.phone .dock { justify-self: stretch; display: flex }
+  .item[data-open="true"] .head .dock { display: none }
+  .dock .d { height: 30px; padding: 0 11px 0 9px; border-radius: 999px; display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: var(--ink-2); transition: background .2s, color .2s, box-shadow .2s, transform .25s var(--spring) }
+  .dock .d svg { width: 13px; height: 13px }
+  .dock .d:hover { background: var(--white); color: var(--ink); box-shadow: var(--bloom); transform: translateY(-1px) }
+  .dock .d:active { transform: translateY(0) scale(.97) }
+  .dock .d.primary { background: var(--dark); color: #fff; box-shadow: inset 0 1px 0 rgba(255,255,255,.16), 0 5px 12px -8px rgba(20,22,26,.45) }
+  .dock .d.primary:hover { background: #2b2d33; color: #fff }
+  .dock .d.icon { width: 30px; padding: 0; justify-content: center }
+  .dock .d.danger:hover { color: var(--red) }
+  body.phone .dock .d { flex: 1; justify-content: center; height: 36px }
+  body.phone .dock .d.icon { flex: 0 0 36px }
+
+  /* ---------- Expanded body ---------- */
+  .body { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .5s var(--ease) }
+  .item[data-open="true"] .body { grid-template-rows: 1fr }
+  .body > div { overflow: hidden }
+  .work { border-top: 1px solid var(--line); padding: 18px 20px 6px; margin: 0 0 0 0 }
+  .label { font-size: 11.5px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--ink-3) }
+
+  .fields { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px }
+  .fields div { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px 0 8px; border-radius: 999px; background: var(--dock); font-size: 13px; font-weight: 500; color: var(--ink) }
+  .fields div b { color: var(--ink-3); font-weight: 500 }
+  .fields svg { width: 13px; height: 13px; color: var(--ink-3) }
+  .content { white-space: pre-wrap; font-size: 16px; line-height: 1.52; letter-spacing: -.012em }
+  .context { margin-top: 18px; background: var(--dock); border-radius: var(--r-s); padding: 12px 14px 12px 40px; font-size: 14px; color: var(--ink-2); line-height: 1.45; position: relative }
+  .context .label { display: block; margin-bottom: 3px }
+  .context::before { content: ""; position: absolute; left: 14px; top: 14px; width: 16px; height: 16px; border-radius: 50%; background: var(--white); box-shadow: var(--bloom) }
+  .context svg { position: absolute; left: 17px; top: 17px; width: 10px; height: 10px; color: var(--ink-2) }
+
+  .path { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px 0 8px; border-radius: 999px; background: var(--dock); font-size: 13px; color: var(--ink-2); font-weight: 500; margin-bottom: 14px }
+  .path svg { width: 12px; height: 12px; color: var(--ink-3) }
+  .change { display: grid; grid-template-columns: 96px 1fr; gap: 6px 12px; align-items: center; padding: 10px 0; border-top: 1px solid var(--line) }
+  .change:first-of-type { border-top: 0 }
+  .change .f { font-size: 13px; color: var(--ink-3); font-weight: 500 }
+  .change .vals { display: flex; align-items: center; gap: 8px; flex-wrap: wrap }
+  .pill { height: 26px; padding: 0 10px; border-radius: 999px; font-size: 13px; font-weight: 600; display: inline-flex; align-items: center }
+  .pill.before { background: var(--dock); color: var(--ink-3); text-decoration: line-through }
+  .pill.before.is-empty { text-decoration: none; font-style: italic; font-weight: 500 }
+  .pill.after { background: var(--dark); color: #fff; box-shadow: inset 0 1px 0 rgba(255,255,255,.16), 0 5px 12px -8px rgba(20,22,26,.45) }
+  .change .arr { width: 14px; height: 14px; color: var(--ink-3) }
+  body.phone .change { grid-template-columns: 1fr; gap: 4px }
+
+  .question { font-size: 17.5px; font-weight: 600; letter-spacing: -.02em; margin-bottom: 12px; display: flex; gap: 10px; align-items: flex-start }
+  .question::before { content: "?"; flex: none; width: 24px; height: 24px; border-radius: 50%; background: var(--dock); color: var(--ink-2); font-size: 13px; font-weight: 700; display: grid; place-items: center; margin-top: 0 }
+  .found { display: flex; flex-direction: column }
+  .found > div { display: grid; grid-template-columns: 110px 1fr; gap: 12px; padding: 9px 0; border-top: 1px solid var(--line); font-size: 14px }
+  .found > div:first-child { border-top: 0 }
+  .found .k { color: var(--ink-3); font-weight: 500; font-size: 13px; padding-top: 1px }
+  .found .v.long { grid-column: 1 / -1; background: var(--dock); border-radius: var(--r-s); padding: 11px 13px; color: var(--ink-2); font-style: italic }
+  body.phone .found > div { grid-template-columns: 1fr; gap: 2px }
+  .seg { display: flex; background: var(--dock); border-radius: 999px; padding: 4px; margin-top: 16px; gap: 2px; box-shadow: inset 0 1px 0 #fff, inset 0 0 0 1px rgba(0,0,0,.02) }
+  .seg button { flex: 1; height: 38px; border-radius: 999px; font-size: 14px; font-weight: 600; color: var(--ink-2); transition: background .2s, color .2s, box-shadow .2s, transform .25s var(--spring) }
+  .seg button:hover { color: var(--ink); background: rgba(255,255,255,.7) }
+  .seg button:active, .seg button.on { background: var(--white); color: var(--ink); box-shadow: var(--bloom); transform: translateY(-1px) }
+
+  .fallback { display: flex; gap: 12px; align-items: flex-start; background: var(--dock); border-radius: var(--r-s); padding: 12px 14px; font-size: 14px; color: var(--ink-2) }
+  .fallback b { color: var(--ink); font-weight: 600; display: block; margin-bottom: 2px }
+
+  .actions { display: flex; gap: 8px; align-items: center; padding: 14px 20px 0; flex-wrap: wrap }
+  .actions .dock { margin: 0 }
+  .actions .spacer { flex: 1 }
+
+
+
+  /* slide to confirm, green fill, round knob */
+  .slide { --w: 180px; --k: 26px; position: relative; width: var(--w); height: 34px; border-radius: 999px; background: var(--white); box-shadow: inset 0 0 0 1px rgba(0,0,0,.05), inset 0 1px 2px rgba(0,0,0,.05); overflow: hidden; user-select: none; touch-action: pan-y; flex: none }
+  body.phone .slide { --w: 100%; width: 100%; height: 38px; --k: 30px }
+  .slide .fill { position: absolute; inset: 0; width: 0; background: linear-gradient(180deg, #5fe07a, #2cc457); border-radius: 999px; box-shadow: inset 0 1px 0 rgba(255,255,255,.45); transition: width .05s linear }
+  .slide .txt { position: absolute; inset: 0; display: grid; place-items: center; font-size: 13px; font-weight: 600; color: var(--ink-2); padding-left: var(--k); pointer-events: none; transition: opacity .2s }
+  .slide .txt.on { color: #fff; opacity: 0 }
+  .slide .knob { position: absolute; top: 4px; left: 4px; width: var(--k); height: var(--k); border-radius: 50%; background: var(--dark); color: #fff; box-shadow: inset 0 1px 0 rgba(255,255,255,.2), 0 4px 10px -3px rgba(20,22,26,.5); display: grid; place-items: center; cursor: grab; transition: left .05s linear, transform .25s var(--spring), background .2s }
+  .slide .knob:active { cursor: grabbing; transform: scale(1.08) }
+  .slide .knob svg { width: 12px; height: 12px }
+  .slide.is-done { pointer-events: none }
+  .slide.is-done .fill { width: 100%; transition: width .3s var(--ease) }
+  .slide.is-done .txt { opacity: 0 } .slide.is-done .txt.on { opacity: 1 }
+  .slide.is-done .knob { left: calc(100% - var(--k) - 4px); background: #fff; color: #2cc457; transition: left .3s var(--ease), background .2s, color .2s }
+  .slide.snap .fill, .slide.snap .knob { transition: width .35s var(--spring), left .35s var(--spring) }
+
+  .thread { display: flex; flex-direction: column; gap: 6px; padding: 12px 20px 0; font-size: 14px }
+  .thread .me { align-self: flex-end; background: var(--dark); color: #fff; padding: 8px 12px; border-radius: 18px 18px 6px 18px; max-width: 80% }
+  .thread .ai { align-self: flex-start; background: var(--dock); color: var(--ink); padding: 8px 12px; border-radius: 18px 18px 18px 6px; max-width: 85% }
+  .reply { margin: 14px 20px 20px; display: flex; align-items: center; gap: 8px; background: var(--dock); border-radius: 999px; padding: 4px 4px 4px 14px; height: 40px; box-shadow: inset 0 1px 0 #fff }
+  .reply::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--ink-3) }
+  .reply input { flex: 1; font-size: 14.5px; min-width: 0 }
+  .reply input::placeholder { color: var(--ink-3) }
+  .reply button { width: 32px; height: 32px; border-radius: 50%; background: var(--white); color: var(--ink); display: grid; place-items: center; box-shadow: var(--bloom); transition: transform .25s var(--spring) }
+  .reply button:hover { transform: translateY(-1px) }
+  .reply button svg { width: 14px; height: 14px }
+
+  /* ---------- Done ---------- */
+  .item[data-state="done"] .head, .item[data-state="done"] .body { display: none }
+  .item[data-state="done"] { background: var(--white); box-shadow: var(--soft) }
+  .done { display: none; align-items: center; gap: 12px; padding: 12px 16px; font-size: 14.5px; font-weight: 500; color: var(--ink-2) }
+  .item[data-state="done"] .done { display: flex }
+  .done .check { width: 32px; height: 32px; border-radius: 11px; background: rgba(48,209,88,.12); color: #22b04a; display: grid; place-items: center; animation: pop .5s var(--spring) both }
+  .done .check svg { width: 14px; height: 14px }
+  @keyframes pop { from { transform: scale(.3) rotate(-20deg); opacity: 0 } }
+  .done .done-msg { color: var(--ink) }
+  .done .undo { margin-left: auto; font-weight: 600; color: var(--ink-2); height: 32px; padding: 0 12px; border-radius: 999px; background: var(--dock) }
+  .done .undo:hover { background: var(--white); color: var(--ink); box-shadow: var(--bloom) }
+
+  /* ---------- Empty ---------- */
+  .empty { text-align: center; padding: 56px 20px 0; opacity: 0; transition: opacity .5s; pointer-events: none }
+  .empty.show { opacity: 1 }
+  .empty .ghost { display: flex; flex-direction: column; width: 220px; margin: 0 auto 28px; opacity: .5 }
+  .empty .ghost i { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px dashed rgba(0,0,0,.12) }
+  .empty .ghost i:last-child { border: 0 }
+  .empty .ghost i::before { content: ""; width: 16px; height: 16px; border-radius: 5px; border: 1.5px solid rgba(0,0,0,.12) }
+  .empty .ghost i::after { content: ""; flex: 1; height: 10px; border-radius: 5px; background: rgba(0,0,0,.06) }
+  .empty h2 { font-size: 17px; font-weight: 700; letter-spacing: -.02em; margin-bottom: 4px }
+  .empty p { font-size: 14.5px; color: var(--ink-2); max-width: 30ch; margin: 0 auto }
+
+  /* ---------- Composer, the dock from the reference ---------- */
+  .composer { position: fixed; left: 50%; bottom: 26px; transform: translateX(-50%); width: min(var(--col), calc(100% - 40px)); z-index: 20; transition: opacity .25s, transform .5s var(--spring) }
+  body.phone .composer { bottom: max(16px, env(safe-area-inset-bottom)); width: calc(100% - 28px) }
+  body.has-open .composer { opacity: 0; transform: translate(-50%, 14px) scale(.98); pointer-events: none }
+  .composer form { background: rgba(255,255,255,.85); -webkit-backdrop-filter: var(--blur); backdrop-filter: var(--blur); border-radius: 999px; height: 56px; display: flex; align-items: center; padding: 0 8px; gap: 4px; box-shadow: inset 0 1px 0 #fff, 0 2px 4px rgba(20,22,26,.04), 0 30px 70px -22px rgba(20,22,26,.32) }
+  .composer .di { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; color: var(--ink-2); transition: background .2s, color .2s, transform .25s var(--spring), box-shadow .2s; flex: none }
+  .composer .di svg { width: 18px; height: 18px }
+  .composer .di:hover { background: var(--white); color: var(--ink); box-shadow: var(--bloom); transform: translateY(-2px) }
+  .composer .sep { width: 1px; height: 22px; background: rgba(0,0,0,.08); margin: 0 6px; flex: none }
+  .composer input { flex: 1; font-size: 15px; min-width: 0; padding: 0 6px }
+  .composer input::placeholder { color: var(--ink-3) }
+  .composer kbd { font: 600 12px/1 var(--font); color: var(--ink-3); background: var(--dock); border-radius: 8px; padding: 7px 9px; letter-spacing: 0; flex: none }
+  .composer .send { width: 40px; height: 40px; border-radius: 50%; background: var(--dark); color: #fff; display: grid; place-items: center; flex: none; box-shadow: inset 0 1px 0 rgba(255,255,255,.2), 0 8px 18px -8px rgba(20,22,26,.6); transition: transform .25s var(--spring) }
+  .composer .send:hover { transform: translateY(-2px) }
+  .composer .send svg { width: 16px; height: 16px }
+  body.phone .composer .sep, body.phone .composer kbd, body.phone .composer .di.opt { display: none }
+
+  /* sparkle, a pulse on the dots, a passing sheen on the count and chip */
+  @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(217,93,68,.38) } 70% { box-shadow: 0 0 0 9px rgba(217,93,68,0) } 100% { box-shadow: 0 0 0 0 rgba(217,93,68,0) } }
+  .top h1::before { animation: pulse 3.2s cubic-bezier(.2,.7,.2,1) infinite; box-shadow: none }
+  .item[data-urgency="now"] .ico::after { animation: pulse 3.2s cubic-bezier(.2,.7,.2,1) infinite 1.1s }
+  @media (prefers-reduced-motion: reduce) { .top h1::before, .item[data-urgency="now"] .ico::after { animation: none } }
+
+  /* ---------- intro, the assistant speaks first ---------- */
+  .intro { position: fixed; inset: 0; z-index: 40; display: grid; place-items: center; background: var(--bg); transition: opacity .5s var(--ease), visibility .5s; padding: 24px }
+  body.ready .intro { opacity: 0; visibility: hidden; pointer-events: none }
+  .intro-in { max-width: 640px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 26px; animation: rise .8s var(--ease) both }
+  .intro-in .spark2 { width: 40px; height: 40px; margin-left: -12px }
+  .intro-in .spark2 svg { display: block; width: 100%; height: 100%; overflow: visible; animation: blobspin 13s ease-in-out infinite alternate }
+  .intro-in .spark2 .aura { transform-origin: 50px 52px; animation: aura 5s ease-in-out infinite }
+  @keyframes blobspin { from { transform: rotate(-5deg) } to { transform: rotate(6deg) } }
+  @keyframes aura { 0%,100% { transform: scale(1.02); opacity: .26 } 50% { transform: scale(1.12); opacity: .42 } }
+  .intro-in h2 { font-size: 24px; font-weight: 500; letter-spacing: -.022em; line-height: 1.3; color: var(--ink); text-wrap: balance; max-width: 40ch }
+  .intro-in h2 small { display: block; font-size: 11.5px; font-weight: 600; color: var(--ink-3); margin-bottom: 14px; letter-spacing: .12em; text-transform: uppercase }
+  .islide { position: relative; width: 200px; height: 44px; border-radius: 999px; background: #ececee; box-shadow: inset 0 2px 6px rgba(20,22,26,.07), inset 0 0 0 1px rgba(0,0,0,.02); overflow: hidden; user-select: none; touch-action: pan-y; margin-top: 4px }
+  .islide .hint { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: var(--ink-3); transition: opacity .25s }
+  .islide .hint svg { width: 13px; height: 13px }
+  .islide .knob { position: absolute; top: 3px; left: 3px; bottom: 3px; min-width: 64%; border-radius: 999px; background: linear-gradient(180deg, #ffffff, #f7f7f7); box-shadow: inset 0 1px 0 #fff, 0 1px 2px rgba(20,22,26,.08), 0 10px 22px -10px rgba(20,22,26,.3); display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 0 16px; font-size: 13px; font-weight: 600; color: var(--ink); cursor: grab; transition: left .05s linear; white-space: nowrap }
+  .islide .knob:active { cursor: grabbing }
+  .islide .knob i { font-style: normal; font-weight: 400; color: var(--ink-3); letter-spacing: -1.5px }
+  .islide.snap .knob { transition: left .35s var(--spring) }
+  .islide.is-done .knob { transition: left .3s var(--ease) }
+  .islide.is-done .hint { opacity: 0 }
+  body:not(.ready) .page > *:not(.intro) { visibility: hidden }
+  body:not(.ready) .composer { z-index: 50 }
+  .item { animation-play-state: paused } body.ready .item { animation-play-state: running }
+  .top, .brief, .progress, .handoff { opacity: 0; transform: translateY(8px) }
+  body.ready .top, body.ready .brief, body.ready .progress, body.ready .handoff.show { opacity: 1; transform: none; transition: opacity .5s var(--ease) .05s, transform .5s var(--ease) .05s }
+  body.ready .handoff:not(.show) { opacity: 0 }
+</style>
+<style>
+  /* ---------- heavy day additions ---------- */
+  .page { max-width: 760px }
+  .top .date { display: none }
+  .bar { display: flex; align-items: center; gap: 12px; padding: 14px 6px 8px }
+  .bar .track { flex: 1; height: 6px; border-radius: 999px; background: rgba(0,0,0,.07); overflow: hidden; box-shadow: inset 0 1px 1px rgba(0,0,0,.04) }
+  .bar .track i { display: block; height: 100%; width: 0; border-radius: 999px; background: var(--ink); transition: width .5s var(--ease) }
+  .bar .n { font-size: 13px; color: var(--ink-2); font-weight: 600; white-space: nowrap } .bar .n b { color: var(--ink) }
+  .brief .spark { margin-top: 2px }
+  .brief span:last-child { max-width: none; text-align: justify; text-justify: inter-word; hyphens: auto }
+  .brief { padding-right: 64px }
+
+  /* date gutter */
+  .day { display: grid; grid-template-columns: 96px 1fr; gap: 0 14px; margin-top: 28px; padding-right: 36px }
+  .day:first-of-type { margin-top: 18px }
+  body.phone .day { grid-template-columns: 1fr; gap: 8px; margin-top: 20px }
+  .day .date { position: sticky; top: 20px; align-self: start; padding: 10px 0 0 6px; line-height: 1 }
+  .day .date b { display: block; font-size: 26px; font-weight: 700; letter-spacing: -.04em; color: var(--ink) }
+  .day .date span { display: block; font-size: 13px; font-weight: 500; letter-spacing: -.01em; color: var(--ink-2); margin-top: 4px; line-height: 1.25; white-space: nowrap }
+  .day .date small { display: block; font-size: 12px; color: var(--ink-3); margin-top: 4px; line-height: 1.35 }
+  .day .date.today b { color: var(--red) }
+  body.phone .day .date { position: static; display: grid; grid-template-columns: auto 1fr; gap: 0 10px; align-items: baseline; padding: 0 6px }
+  body.phone .day .date b { font-size: 20px; grid-row: 1 / span 2 } body.phone .day .date span { margin: 0 } body.phone .day .date small { margin-top: 1px }
+  .day .list { min-width: 0 }
+  .day[data-empty="true"] { display: none }
+
+  /* stack card */
+  .item.stack .head { grid-template-columns: 44px 1fr auto }
+  .stack .meta { grid-column: 2; display: flex; align-items: center; gap: 10px; margin-top: 8px }
+  .stack .meta .track { width: 140px; height: 5px; border-radius: 999px; background: rgba(0,0,0,.07); overflow: hidden }
+  .stack .meta .track i { display: block; height: 100%; width: 0; background: var(--green); border-radius: 999px; transition: width .4s var(--ease) }
+  .stack .meta .n { font-size: 12.5px; font-weight: 600; color: var(--ink-2) }
+  .stack .sample { grid-column: 2 / span 2; margin-top: 10px; display: flex; flex-direction: column; gap: 4px }
+  .stack .sample div { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--ink-2) }
+  .stack .sample div b { color: var(--ink); font-weight: 600; min-width: 120px }
+  .stack .sample .pill { height: 22px; font-size: 12px; padding: 0 8px }
+  .sample .arr, .row .arr { width: 12px; height: 12px; color: var(--ink-3); flex: none }
+  .stack .sample .more { color: var(--ink-3); font-size: 12.5px }
+  .item[data-open="true"] .sample { display: none }
+  /* rows inside an opened stack/bundle */
+  .rows { border-top: 1px solid var(--line) }
+  .row { display: grid; grid-template-columns: 28px 1fr auto; gap: 12px; align-items: center; padding: 11px 18px; border-top: 1px solid var(--line); font-size: 14px; transition: background .2s, opacity .3s }
+  .row:first-child { border-top: 0 }
+  .row:hover { background: rgba(0,0,0,.02) }
+  .row .cb { width: 22px; height: 22px; border-radius: 50%; border: 1.5px solid rgba(0,0,0,.14); display: grid; place-items: center; color: #fff; background: #fff; cursor: pointer; transition: background .2s var(--spring), border-color .2s, transform .25s var(--spring) }
+  .row .cb svg { width: 11px; height: 11px; opacity: 0; transition: opacity .15s }
+  .row .cb:hover { border-color: var(--ink-2) }
+  .row[data-done="true"] .cb { background: var(--green); border-color: var(--green); transform: scale(1.05) }
+  .row[data-done="true"] .cb svg { opacity: 1 }
+  .row[data-done="true"] .t { color: var(--ink-3) }
+  .row .t { font-weight: 500; display: flex; gap: 8px; align-items: center; flex-wrap: wrap }
+  .row .t .pill { height: 22px; font-size: 12px; padding: 0 8px }
+  .row .go { width: 22px; height: 22px; color: var(--ink-3); display: grid; place-items: center }
+  .row .go svg { width: 12px; height: 12px }
+  .row .sub { font-size: 12.5px; color: var(--ink-3); grid-column: 2 }
+
+  /* approve-all button: progress-in-button */
+  .dock .d.batch { position: relative; overflow: hidden; min-width: 132px; justify-content: center }
+  .dock .d.batch .p { position: absolute; left: 0; top: 0; bottom: 0; width: 0; background: var(--green); transition: width 1.1s linear; opacity: .9 }
+  .dock .d.batch span, .dock .d.batch svg { position: relative }
+  .dock .d.batch.busy { background: rgba(0,0,0,.06); color: var(--ink-2) }
+  .dock .d.batch.busy .p { width: 100% }
+  .dock .d.batch.ok { background: var(--green); color: #fff }
+
+  /* attention card */
+  .item.attn { background: linear-gradient(180deg, #fffdf7, #fff) }
+  .item.attn .ico { background: rgba(255,184,0,.14); color: #b8860b }
+  .attn .fallback { background: rgba(255,184,0,.08); color: var(--ink-2) }
+  .attn .fallback b { color: var(--ink) }
+  .attn .fallback .kv { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px }
+  .attn .fallback .kv span { background: #fff; border-radius: 999px; padding: 3px 9px; font-size: 12.5px; font-weight: 500; color: var(--ink-2); box-shadow: 0 0 0 1px rgba(0,0,0,.04) }
+  .attn .fallback .kv span b { color: var(--ink); font-weight: 600 }
+
+  /* bundle */
+  .item.bundle .head { grid-template-columns: 44px 1fr auto }
+  .bundle .faces { grid-column: 2; display: flex; align-items: center; gap: 8px; margin-top: 8px }
+  .bundle .faces .av { display: flex } .bundle .faces .av i { width: 22px; height: 22px; border-radius: 50%; background: var(--dock); box-shadow: 0 0 0 2px #fff; margin-left: -6px; display: grid; place-items: center; color: var(--ink-3) }
+  .bundle .faces .av i:first-child { margin-left: 0 }
+  .bundle .faces .av i svg { width: 12px; height: 12px }
+  .bundle .faces .n { font-size: 12.5px; font-weight: 600; color: var(--ink-2) }
+  .bundle .rows .item { box-shadow: none; border-radius: 0; border-top: 1px solid var(--line) }
+  .bundle .rows .item:hover { box-shadow: none }
+  .bundle .rows .item .ico { width: 36px; height: 36px; border-radius: 11px } .bundle .rows .item .ico svg { width: 17px; height: 17px }
+  .bundle .rows .item .head { grid-template-columns: 36px 1fr auto }
+  .bundle .rows .item[data-state="done"] { background: transparent }
+
+  /* done line variants */
+  .done .n { margin-left: 6px; font-size: 12.5px; color: var(--ink-3); font-weight: 500 }
+</style>
+</head>
+<body>
+<main class="page">
+  <div class="intro" id="intro"><div class="intro-in">
+    <span class="spark2"><svg viewBox="0 0 100 100" aria-hidden="true">
+      <defs>
+        <radialGradient id="gO" cx="35%" cy="32%" r="75%"><stop offset="0" stop-color="#ffb066"/><stop offset=".55" stop-color="#ee6a3e"/><stop offset="1" stop-color="#d8433d"/></radialGradient>
+        <radialGradient id="gB" cx="38%" cy="35%" r="75%"><stop offset="0" stop-color="#6fb0ff"/><stop offset=".55" stop-color="#3f6ff2"/><stop offset="1" stop-color="#2a3fcc"/></radialGradient>
+        <linearGradient id="gF" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f2548f"/><stop offset=".48" stop-color="#b733cf"/><stop offset="1" stop-color="#5233d6"/>
+          <animateTransform attributeName="gradientTransform" type="rotate" values="0 .5 .5;25 .5 .5;0 .5 .5" dur="10.5s" repeatCount="indefinite" calcMode="spline" keySplines=".4 0 .6 1;.4 0 .6 1"/></linearGradient>
+        <radialGradient id="gH" cx="30%" cy="25%" r="55%"><stop offset="0" stop-color="#fff" stop-opacity=".45"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
+        <filter id="goo" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur in="SourceGraphic" stdDeviation="1.8" result="b"/><feColorMatrix in="b" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 22 -9" result="g"/><feComposite in="SourceGraphic" in2="g" operator="atop"/></filter>
+        <filter id="glow" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="4.5"/></filter>
+        <filter id="sh" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#2a1a4a" flood-opacity=".2"/></filter>
+      </defs>
+      <g class="aura" filter="url(#glow)" opacity=".3">
+        <circle cx="35" cy="33" r="21" fill="#f08a4a"/><circle cx="69" cy="52" r="21" fill="#4f7cf5"/>
+        <path d="M23 50 C20 33 38 20 55 32 C71 43 82 60 67 79 C56 93 33 88 28 72 C25 64 25 58 23 50 Z" fill="#b33fd0"/>
+      </g>
+      <g filter="url(#sh)"><g filter="url(#goo)">
+        <circle cx="35" cy="33" r="21" fill="url(#gO)">
+          <animate attributeName="cx" values="35;38;33;35" dur="7.5s" repeatCount="indefinite" calcMode="spline" keySplines=".4 0 .6 1;.4 0 .6 1;.4 0 .6 1"/>
+          <animate attributeName="cy" values="33;36;31;33" dur="9s" repeatCount="indefinite" calcMode="spline" keySplines=".4 0 .6 1;.4 0 .6 1;.4 0 .6 1"/>
+          <animate attributeName="r" values="21;22.5;20;21" dur="6.5s" repeatCount="indefinite" calcMode="spline" keySplines=".4 0 .6 1;.4 0 .6 1;.4 0 .6 1"/>
+        </circle>
+        <circle cx="69" cy="52" r="21" fill="url(#gB)">
+          <animate attributeName="cx" values="69;66;71;69" dur="8s" repeatCount="indefinite" calcMode="spline" keySplines=".4 0 .6 1;.4 0 .6 1;.4 0 .6 1"/>
+          <animate attributeName="cy" values="52;49;55;52" dur="10s" repeatCount="indefinite" calcMode="spline" keySplines=".4 0 .6 1;.4 0 .6 1;.4 0 .6 1"/>
+          <animate attributeName="r" values="21;20;22.5;21" dur="7.5s" repeatCount="indefinite" calcMode="spline" keySplines=".4 0 .6 1;.4 0 .6 1;.4 0 .6 1"/>
+        </circle>
+        <path fill="url(#gF)" d="M23 50 C20 33 38 20 55 32 C71 43 82 60 67 79 C56 93 33 88 28 72 C25 64 25 58 23 50 Z">
+          <animate attributeName="d" dur="11.5s" repeatCount="indefinite" calcMode="spline" keySplines=".4 0 .6 1;.4 0 .6 1;.4 0 .6 1"
+            values="M23 50 C20 33 38 20 55 32 C71 43 82 60 67 79 C56 93 33 88 28 72 C25 64 25 58 23 50 Z;
+                    M25 48 C24 30 44 20 58 30 C74 41 84 62 70 77 C58 90 36 90 29 74 C25 66 26 56 25 48 Z;
+                    M22 52 C19 35 36 22 52 33 C68 44 80 58 66 80 C55 94 32 86 27 71 C23 63 24 60 22 52 Z;
+                    M23 50 C20 33 38 20 55 32 C71 43 82 60 67 79 C56 93 33 88 28 72 C25 64 25 58 23 50 Z"/>
+        </path>
+        <path fill="url(#gH)" d="M23 50 C20 33 38 20 55 32 C71 43 82 60 67 79 C56 93 33 88 28 72 C25 64 25 58 23 50 Z">
+          <animate attributeName="d" dur="11.5s" repeatCount="indefinite" calcMode="spline" keySplines=".4 0 .6 1;.4 0 .6 1;.4 0 .6 1"
+            values="M23 50 C20 33 38 20 55 32 C71 43 82 60 67 79 C56 93 33 88 28 72 C25 64 25 58 23 50 Z;
+                    M25 48 C24 30 44 20 58 30 C74 41 84 62 70 77 C58 90 36 90 29 74 C25 66 26 56 25 48 Z;
+                    M22 52 C19 35 36 22 52 33 C68 44 80 58 66 80 C55 94 32 86 27 71 C23 63 24 60 22 52 Z;
+                    M23 50 C20 33 38 20 55 32 C71 43 82 60 67 79 C56 93 33 88 28 72 C25 64 25 58 23 50 Z"/>
+        </path>
+      </g></g>
+    </svg></span>
+    <h2><small>Tuesday · 8:40 · back from four days away</small>Welcome back, Summer. Thirty-one things came in, I've grouped them for you.</h2>
+    <div class="islide" id="islide"><span class="hint"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg></span><div class="knob" id="iknob"><i>‖</i>Slide to begin</div></div>
+  </div></div>
+  
+  <div class="top"><h1>Today</h1></div>
+  <p class="brief" id="brief"><span class="spark" aria-hidden="true"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1l1.6 4.4L14 7l-4.4 1.6L8 13l-1.6-4.4L2 7l4.4-1.6z"/></svg></span><span>Welcome back. Thirty-one things came in while you were away. I've grouped what I could, twelve are the same gap in the March sheet, eight are routine pipeline updates. Four are about Daniel, and three I'd like you to look at properly.</span></p>
+  <div class="bar"><div class="track"><i id="barFill"></i></div><span class="n"><b id="doneN">0</b> of 31</span></div>
+  <div id="days"></div>
+  <div class="empty" id="empty">
+    <div class="ghost"><i></i><i></i><i></i></div>
+    <h2>That's everything</h2>
+    <p>I'll send the weekly report at 9.</p>
+  </div>
+</main>
+<div class="composer"><form id="composer">
+  <button type="button" class="di" data-tip="What it's doing"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></button>
+  <button type="button" class="di opt" data-tip="Handled on its own"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 4v5c0 5-3.5 8-7 9-3.5-1-7-4-7-9V7z"/><path d="M9 12l2 2 4-4"/></svg></button>
+  <span class="sep"></span>
+  <input id="composerInput" placeholder="Tell it something…" aria-label="Instruction">
+  <kbd>enter</kbd>
+  <button type="button" class="di opt" data-tip="Speak"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button>
+  <button type="submit" class="send" data-tip="Send"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 13V3M4 7l4-4 4 4"/></svg></button>
+</form></div>
+
+<script src="_fixtures.js"></script>
+<script>
+/* ---------- heavy-day fixtures (from system/fixtures.ts) ---------- */
+const CELLS = [['Beacon Labs',47,'4,200.00'],['Acme Corp',48,'12,000.00'],['Corvid Studio',49,'2,750.00'],['Meridian Health',50,'8,400.00'],['Northwind',51,'3,100.00'],['Palegrove',52,'5,600.00'],['Quarry & Co',53,'1,950.00'],['Rothwell',54,'7,200.00'],['Saltmarsh',55,'2,400.00'],['Tenby Partners',56,'6,800.00'],['Umbral',57,'3,350.00'],['Vantage Rowe',58,'9,100.00']]
+  .map(([c,row,a],i)=>({id:`wb-cell-${i+1}`, title:`Fill March revenue for ${c}`, why:'The invoice cleared but the sheet was never updated.', source:'Revenue sheet', urgency:'whenever', raisedAt:'Fri', groupKey:'march', label:c, body:{kind:'diff', path:['2026 Revenue','March',`Row ${row}`], changes:[{field:'Amount', before:null, after:`$${a}`}]}, actions:[{kind:'approve'},{kind:'edit'},{kind:'discard'}], done:'Filled'}));
+const ROUTINE = [['Northwind','Stage','Proposal sent','Contract out'],['Palegrove','Owner','Unassigned','You'],['Quarry & Co','Renewal date',null,'1 Nov 2026'],['Rothwell','Stage','Discovery','Proposal sent'],['Saltmarsh','Invoice status','Sent','Paid'],['Tenby Partners','Stage','Contract out','Closed won'],['Umbral','Owner','Unassigned','You'],['Vantage Rowe','Renewal date',null,'15 Dec 2026']]
+  .map(([c,f,b,a],i)=>({id:`wb-routine-${i+1}`, title:`Update ${f.toLowerCase()} for ${c}`, why: b===null?'This has been empty since the deal was created.':'The record is behind what actually happened.', source:'Monday.com', urgency:'whenever', raisedAt:'Thu', groupKey:'pipeline', label:c, body:{kind:'diff', path:['Sales Pipeline',c], changes:[{field:f, before:b, after:a}]}, actions:[{kind:'approve'},{kind:'edit'},{kind:'discard'}], done:'Updated'}));
+const DANIEL = [
+  {id:'wb-d3', title:'Send Daniel the signed copy', why:'He asked for it twice and I have not sent it.', source:'Gmail', urgency:'now', raisedAt:'Fri', groupKey:'daniel', body:{kind:'document', fields:[{label:'To',value:'daniel@acme.com'},{label:'Subject',value:'Signed agreement, Acme Q3'},{label:'Attached',value:'acme-q3-signed.pdf'}], content:'Attaching the countersigned copy. Thanks for moving quickly on this.'}, actions:[{kind:'approve',label:'Send it'},{kind:'edit'},{kind:'discard'}], done:'Sent to Daniel'},
+  {id:'wb-d1', title:'Reply to Daniel about the kickoff date', why:'He suggested the 4th. Your calendar is clear.', source:'Gmail', urgency:'today', raisedAt:'Thu', groupKey:'daniel', body:{kind:'document', fields:[{label:'To',value:'daniel@acme.com'},{label:'Subject',value:'Re: Kickoff'}], content:'The 4th works. I will send an invite this afternoon.', context:{label:'What Daniel sent', content:'Does the 4th work for kickoff?'}}, actions:[{kind:'approve',label:'Send it'},{kind:'approveAlways',scope:'emails to Daniel',after:5},{kind:'edit'},{kind:'discard'}], done:'Sent to Daniel'},
+  {id:'wb-d2', title:'Add Daniel as the Acme primary contact', why:'He has been signing, but the record still lists his predecessor.', source:'Monday.com', urgency:'whenever', raisedAt:'Thu', groupKey:'daniel', body:{kind:'diff', path:['Clients','Acme Corp'], changes:[{field:'Primary contact',before:'Ruth Alderman',after:'Daniel Voss'},{field:'Email',before:'ruth@acme.com',after:'daniel@acme.com'}]}, actions:[{kind:'approve'},{kind:'edit'},{kind:'discard'}], done:'Updated the record'},
+  {id:'wb-d4', title:'Daniel asked about next year, I did not answer', why:'Pricing is your call, not mine.', source:'Gmail', urgency:'whenever', raisedAt:'Wed', groupKey:'daniel', body:{kind:'evidence', question:'What should I tell him about 2027 pricing?', found:[{label:'What he asked', long:true, value:'Any sense of what 2027 looks like? Trying to get ahead of budget season.'},{label:'This year', value:'$12,000 · flat since 2024'},{label:'Your note in June', value:'"Raise Acme next cycle."'}]}, actions:[{kind:'answer'},{kind:'discard'}], done:'Told it'},
+];
+const SINGLES = [
+  {id:'wb-p1', title:"This week's payment numbers don't line up", why:'Stripe and the old email receipts disagree, and one charge appears twice.', source:'Stripe', urgency:'now', raisedAt:'Today', body:{kind:'evidence', question:'Which figure should the report use?', found:[{label:'Stripe, wk of 17 Aug', value:'$38,400.00'},{label:'Email receipts', value:'$41,000.00'},{label:'The gap', value:'$2,600.00'},{label:'Duplicate found', long:true, value:'Beacon Labs, $2,400.00, 14 March, charged twice, seven minutes apart. Neither has been refunded.'}], options:['Use Stripe','Use the receipts','Hold the report']}, actions:[{kind:'answer'},{kind:'discard'}], done:'Told it'},
+  {id:'wb-p3', title:'Reply to Corvid about the invoice they queried', why:'They think they were billed for two rounds. They were billed for three.', source:'Gmail', urgency:'today', raisedAt:'Today', body:{kind:'document', fields:[{label:'To',value:'accounts@corvidstudio.com'},{label:'Subject',value:'Re: Invoice #1051'}], content:'Thanks for flagging, the invoice covers three rounds of revisions, not two. I have attached the breakdown.', context:{label:'What they sent', content:'We only signed off two rounds, can you check this?'}}, actions:[{kind:'approve',label:'Send it'},{kind:'edit'},{kind:'discard'}], done:'Sent to Corvid'},
+  {id:'wb-p2', title:'Meridian looks finished but nobody moved it', why:'Every task is done and the invoice is paid. I will guess wrong if you say nothing.', source:'Monday.com', urgency:'whenever', raisedAt:'Wed', body:{kind:'diff', path:['Projects','Meridian Health, brand refresh'], changes:[{field:'Status',before:'In progress',after:'Done'}]}, actions:[{kind:'approve'},{kind:'edit'},{kind:'discard'}], done:'Moved to Done'},
+];
+const UNKNOWN = {id:'wb-unknown-1', title:'Northwind needs a second approver on the PO', why:'Their finance system wants someone else to sign as well. I cannot be that person.', source:'Coupa', urgency:'today', raisedAt:'Thu', body:{kind:'approval_chain', data:{po:'PO-88421', amount:'$18,000.00', approvers:['you','unassigned']}}, actions:[{kind:'approve'},{kind:'discard'}], done:'Approved the PO'};
+const CARRIED = LIGHT_DAY.map(w => ({...w, raisedAt:'Wed'}));
+const ALL = [...SINGLES, ...DANIEL, ...CELLS, ...ROUTINE, UNKNOWN, ...CARRIED]; // 31
+const byId = Object.fromEntries(ALL.map(w => [w.id, w]));
+
+/* ---------- icons & renderers (same as F) ---------- */
+const I = {
+  chev: `<span class="chev"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6l4 4 4-4"/></svg></span>`,
+  arr: `<svg class="arr" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg>`,
+  arrR: `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg>`,
+  check: `<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6.5l2.5 2.5L10 3.5"/></svg>`,
+  crumb: `<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 2.5L8 6l-3.5 3.5"/></svg>`,
+  up: `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 13V3M4 7l4-4 4 4"/></svg>`,
+  send: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 3L10 14M21 3l-7 18-4-7-7-4z"/></svg>`,
+  pen: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4l10-10-4-4L4 16z"/><path d="M13 7l4 4"/></svg>`,
+  trash: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg>`,
+  reply: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 1 1 3 6.2L4 20l1.4-3.5A8 8 0 0 1 4 12z"/></svg>`,
+  always: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 2l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 22l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>`,
+  refresh: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.3-5.7"/><path d="M20 4v5h-5"/></svg>`,
+  quote: `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 7h4v4H8v2H6V9a2 2 0 0 1 1-2zm8 0h4v4h-3v2h-2V9a2 2 0 0 1 1-2z"/></svg>`,
+  at: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M16 12v1.5a2.5 2.5 0 0 0 5 0V12a9 9 0 1 0-3.5 7.1"/></svg>`,
+  tag: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12V4h8l9 9-8 8z"/><circle cx="7.5" cy="8.5" r="1.5"/></svg>`,
+};
+const SRC = {
+  'Gmail': `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M3 8l9 6 9-6"/></svg>`,
+  'Monday.com': `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M3 10h18M9 10v10"/></svg>`,
+  'Calendar': `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>`,
+};
+const R = {
+  document: b => `<div class="work"><div class="fields">${b.fields.map(f=>`<div>${f.label==='To'?I.at:I.tag}<b>${esc(f.label)}</b>${esc(f.value)}</div>`).join('')}</div><div class="content">${esc(b.content)}</div>${b.context?`<div class="context">${I.quote}<span class="label">${esc(b.context.label)}</span>${esc(b.context.content)}</div>`:''}</div>`,
+  diff: b => `<div class="work"><div class="path">${b.path.map(p=>esc(p)).join(I.crumb)}</div>${b.changes.map(c=>`<div class="change"><span class="f">${esc(c.field)}</span><span class="vals"><span class="pill before ${c.before===null?'is-empty':''}">${c.before===null?'empty':esc(c.before)}</span>${I.arr}<span class="pill after">${esc(c.after)}</span></span></div>`).join('')}</div>`,
+  evidence: b => `<div class="work"><div class="question">${esc(b.question)}</div><div class="found">${b.found.map(f=>`<div><span class="k">${esc(f.label)}</span><span class="v ${f.long?'long':''}">${esc(f.value)}</span></div>`).join('')}</div>${b.options?`<div class="seg">${b.options.map(o=>`<button data-answer="${esc(o)}">${esc(o)}</button>`).join('')}</div>`:''}</div>`,
+};
+const fallback = b => `<div class="work"><div class="fallback"><span>⚠︎</span><div><b>I can't show this kind of work here yet.</b>${esc(JSON.stringify(b.data ?? ''))}</div></div></div>`;
+const label = a => ({approve:a.label||'Approve', approveAlways:`Always · ${a.scope}`, edit:'Edit', discard:'Discard'}[a.kind]);
+const icon = a => ({approve:I.send, approveAlways:I.always, edit:I.pen, discard:I.trash}[a.kind]);
+const tip = a => ({approve:`${a.label||'Approve'} · A`, approveAlways:`Hand off ${a.scope}`, edit:'Edit first · E', discard:'Throw away · X'}[a.kind]);
+
+
+const check = `<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6.5l2.5 2.5L10 3.5"/></svg>`;
+SRC['Revenue sheet'] = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M3 10h18M3 15h18M9 4v16"/></svg>`;
+SRC['Stripe'] = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="12" rx="3"/><path d="M3 10h18M7 14h3"/></svg>`;
+SRC['Coupa'] = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z"/><path d="M12 12v9M4 7.5l8 4.5 8-4.5"/></svg>`;
+const urgChip = w => w.urgency==='now' ? `<span class="chip">Now</span>` : '';
+
+function itemHTML(wb, extraCls='') {
+  const isQ = wb.body.kind === 'evidence';
+  const quick = isQ ? `<button class="d primary" data-act="open" data-tip="Answer · ↵">${I.reply}Answer</button>`
+    : wb.actions.filter(a=>a.kind==='approve'||a.kind==='edit').map(a=>`<button class="d ${a.kind==='approve'?'primary':''}" data-act="${a.kind}" data-tip="${tip(a)}">${icon(a)}${label(a)}</button>`).join('');
+  const bodyHTML = R[wb.body.kind] ? R[wb.body.kind](wb.body) : `<div class="work"><div class="fallback"><span>⚠︎</span><div><b>I can't show this kind of work here yet.</b>Here is what came with it:<div class="kv">${Object.entries(wb.body.data||{}).map(([k,v])=>`<span><b>${esc(k)}</b> ${esc(Array.isArray(v)?v.join(', '):v)}</span>`).join('')}</div></div></div></div>`;
+  return `<article class="item ${extraCls} ${R[wb.body.kind]?'':'attn'}" id="${wb.id}" data-urgency="${wb.urgency}" data-open="false" data-state="waiting">
+    <div class="head">
+      <span class="ico" data-tip="${esc(wb.source)}">${SRC[wb.source]||I.tag}</span>
+      <div class="row1"><span class="src">${esc(wb.source)}</span><span class="dot"></span><span>${esc(wb.raisedAt)}</span>${urgChip(wb)}</div>
+      ${I.chev}
+      <div class="title">${esc(wb.title)}</div><div class="why">${esc(wb.why)}</div>
+      <div class="dock">${quick}</div>
+    </div>
+    <div class="body"><div>
+      ${bodyHTML}
+      <div class="actions"><div class="dock">${wb.actions.filter(a=>a.kind!=='answer').map(a =>
+        a.kind==='approve' ? `<div class="slide" data-slide><div class="fill"></div><div class="txt">Slide to ${(a.label||'approve').toLowerCase().replace(' it','')}</div><div class="txt on">${a.label||'Approved'} ✓</div><div class="knob">${I.arrR}</div></div>`
+        : a.kind==='discard' ? `<button class="d icon danger" data-act="discard" data-tip="${tip(a)}">${I.trash}</button>`
+        : `<button class="d ${a.kind==='edit'?'icon':''}" data-act="${a.kind}" data-tip="${tip(a)}">${icon(a)}${a.kind==='edit'?'':label(a)}</button>`).join('')}</div></div>
+      <div class="thread" hidden></div>
+      <form class="reply"><input placeholder="Tell it something about this…" aria-label="Reply"><button type="submit" aria-label="Send">${I.up}</button></form>
+    </div></div>
+    <div class="done"><span class="check">${check}</span><span class="done-msg"></span><button class="undo">Undo</button></div>
+  </article>`;
+}
+
+function stackHTML(key, title, items, ico) {
+  const n = items.length;
+  const sample = items.slice(0,2).map(w=>`<div><b>${esc(w.label)}</b><span class="pill before ${w.body.changes[0].before===null?'is-empty':''}">${w.body.changes[0].before===null?'empty':esc(w.body.changes[0].before)}</span>${I.arr}<span class="pill after">${esc(w.body.changes[0].after)}</span></div>`).join('');
+  return `<article class="item stack" id="stack-${key}" data-open="false" data-state="waiting" data-key="${key}">
+    <div class="head">
+      <span class="ico" data-tip="${esc(items[0].source)}">${ico}</span>
+      <div class="row1"><span class="src">${esc(items[0].source)}</span><span class="dot"></span><span>${n} · same pattern</span></div>
+      ${I.chev}
+      <div class="title">${esc(title)}</div><div class="why">${esc(items[0].why)}</div>
+      <div class="meta"><div class="track"><i></i></div><span class="n"><span class="k">0</span> of ${n}</span></div>
+      <div class="sample">${sample}<span class="more">and ${n-2} more like these</span></div>
+      <div class="dock"><button class="d primary batch" data-batch="${key}" data-tip="Approve all ${n} · ⇧A"><i class="p"></i>${I.send}<span>Approve all ${n}</span></button><button class="d" data-act="open" data-tip="See every row">${I.pen}Look</button></div>
+    </div>
+    <div class="body"><div>
+      <div class="rows">${items.map(w=>`<div class="row" data-id="${w.id}" data-done="false"><span class="cb" data-tip="Approve this one">${check}</span><span class="t">${esc(w.label)} <span class="pill before ${w.body.changes[0].before===null?'is-empty':''}">${w.body.changes[0].before===null?'empty':esc(w.body.changes[0].before)}</span>${I.arr}<span class="pill after">${esc(w.body.changes[0].after)}</span></span><span class="go">${I.crumb}</span></div>`).join('')}</div>
+      <div class="actions"><div class="dock"><button class="d primary batch" data-batch="${key}"><i class="p"></i>${I.send}<span>Approve the rest</span></button><button class="d icon danger" data-tip="Throw all away">${I.trash}</button></div></div>
+    </div></div>
+    <div class="done"><span class="check">${check}</span><span class="done-msg"></span><span class="n"></span><button class="undo">Undo</button></div>
+  </article>`;
+}
+
+function bundleHTML(key, title, items) {
+  return `<article class="item bundle" id="bundle-${key}" data-open="false" data-state="waiting">
+    <div class="head">
+      <span class="ico">${SRC['Gmail']}</span>
+      <div class="row1"><span class="src">Gmail · Monday.com</span><span class="dot"></span><span>${items.length} things</span>${items.some(w=>w.urgency==='now')?`<span class="chip">One needs you</span>`:''}</div>
+      ${I.chev}
+      <div class="title">${esc(title)}</div><div class="why">Read these together, they're one conversation.</div>
+      <div class="faces"><span class="av"><i>${I.at}</i><i>${I.tag}</i><i>${I.reply}</i><i>${I.pen}</i></span><span class="n">${items.map(w=>w.body.kind).filter((v,i,a)=>a.indexOf(v)===i).join(' · ')}</span></div>
+      <div class="dock"><button class="d primary" data-act="open" data-tip="Open all four">${I.reply}Read</button></div>
+    </div>
+    <div class="body"><div><div class="rows">${items.map(w=>itemHTML(w)).join('')}</div></div></div>
+    <div class="done"><span class="check">${check}</span><span class="done-msg"></span><button class="undo">Undo</button></div>
+  </article>`;
+}
+
+/* ---------- days ---------- */
+const DAYS = [
+  {k:'look', n:4, t:'Needs you', sub:'', hot:true, html: [...SINGLES.slice(0,2), UNKNOWN, SINGLES[2]].map(w=>itemHTML(w)).join('')},
+  {k:'daniel', n:4, t:'About Daniel', sub:'', html: bundleHTML('daniel','About Daniel',DANIEL)},
+  {k:'same', n:20, t:'Same pattern', sub:'', html: stackHTML('march','Filling March revenue',CELLS,SRC['Revenue sheet']) + stackHTML('pipeline','Pipeline updates',ROUTINE,SRC['Monday.com'])},
+  {k:'carried', n:3, t:'From last week', sub:'', html: CARRIED.map(w=>itemHTML(w)).join('')},
+];
+document.getElementById('days').innerHTML = DAYS.map(d=>`<section class="day" data-day="${d.k}"><div class="date ${d.hot?'today':''}"><b>${d.n}</b><span>${esc(d.t)}</span></div><div class="list">${d.html}</div></section>`).join('');
+const stack = document.getElementById('days');
+
+/* ---------- progress ---------- */
+const doneIds = new Set();
+function progress() {
+  document.getElementById('doneN').textContent = doneIds.size;
+  document.getElementById('barFill').style.width = (doneIds.size/31*100) + '%';
+  document.body.classList.toggle('has-open', !![...stack.querySelectorAll('.item')].find(c => c.dataset.open === 'true' && c.dataset.state === 'waiting'));
+  stack.querySelectorAll('.day').forEach(d => d.dataset.empty = ![...d.querySelectorAll(':scope > .list > .item')].some(i => i.dataset.state !== 'gone'));
+  if (doneIds.size === 31) { document.getElementById('brief').querySelector('span:last-child').textContent = "That's everything. I'll send the weekly report at 9."; document.getElementById('empty').classList.add('show'); }
+}
+function markDone(ids, on) { ids.forEach(id => on ? doneIds.add(id) : doneIds.delete(id)); progress(); }
+
+/* ---------- single item behaviour ---------- */
+const timers_ = new Map();
+function finish(el, msg, ids) {
+  el.dataset.open = 'false'; el.dataset.state = 'done';
+  el.querySelector(':scope > .done .done-msg').textContent = msg; markDone(ids, true);
+  timers_.set(el.id, setTimeout(() => { el.dataset.state = 'gone'; progress(); }, 6000));
+}
+stack.addEventListener('click', e => {
+  const el = e.target.closest('.item'); if (!el) return;
+  if (e.target.closest('.undo')) { const ids = JSON.parse(el.dataset.ids||'null') || [el.id]; clearTimeout(timers_.get(el.id)); el.dataset.state = 'waiting'; el.querySelector('.slide')?.classList.remove('is-done','snap'); el.querySelectorAll('.row').forEach(r=>r.dataset.done='false'); el.querySelectorAll('.batch').forEach(b=>{b.classList.remove('busy','ok')}); markDone(ids, false); const tr=el.querySelector('.meta .track i'); if (tr) tr.style.width='0'; const k=el.querySelector('.meta .k'); if (k) k.textContent='0'; return; }
+  const wb = byId[el.id];
+  const act = e.target.closest('[data-act]')?.dataset.act;
+  const answer = e.target.closest('[data-answer]')?.dataset.answer;
+  const batch = e.target.closest('[data-batch]')?.dataset.batch;
+  const cb = e.target.closest('.row .cb');
+  if (batch) return approveAll(el, batch);
+  if (cb) { const row = cb.closest('.row'); row.dataset.done = row.dataset.done !== 'true'; syncStack(el); return; }
+  if (e.target.closest('.row') && !e.target.closest('.item .item')) { return; }
+  if (answer && wb) return finish(el, `${wb.done}: ${answer}`, [el.id]);
+  if (act === 'discard') return finish(el, 'Thrown away', el.classList.contains('stack') ? rowsOf(el) : [el.id]);
+  if (act === 'edit' || act === 'open') { el.dataset.open = 'true'; progress(); return; }
+  if (act === 'approve' && wb) return finish(el, wb.done, [el.id]);
+  if (e.target.closest('.head') && !e.target.closest('button')) { el.dataset.open = el.dataset.open !== 'true'; progress(); }
+});
+const rowsOf = el => [...el.querySelectorAll('.row')].map(r => r.dataset.id);
+function syncStack(el) {
+  const rows = [...el.querySelectorAll('.row')], d = rows.filter(r=>r.dataset.done==='true');
+  el.querySelector('.meta .track i').style.width = (d.length/rows.length*100)+'%';
+  el.querySelector('.meta .k').textContent = d.length;
+  markDone(rows.map(r=>r.dataset.id), false); markDone(d.map(r=>r.dataset.id), true);
+  if (d.length === rows.length) setTimeout(()=>{ el.dataset.ids = JSON.stringify(rows.map(r=>r.dataset.id)); el.dataset.open='false'; el.dataset.state='done'; el.querySelector(':scope > .done .done-msg').textContent = el.dataset.key==='march' ? 'Filled 12 cells' : 'Updated 8 records'; el.querySelector(':scope > .done .n').textContent = 'one undo for all of them'; timers_.set(el.id, setTimeout(()=>{ el.dataset.state='gone'; progress(); }, 6000)); }, 500);
+}
+function approveAll(el, key) {
+  const btns = el.querySelectorAll('.batch'); btns.forEach(b => b.classList.add('busy'));
+  const rows = [...el.querySelectorAll('.row')].filter(r => r.dataset.done !== 'true');
+  rows.forEach((r, i) => setTimeout(() => { r.dataset.done = 'true'; el.querySelector('.meta .track i').style.width = ((rows.length - rows.length + i + 1 + ([...el.querySelectorAll('.row')].length - rows.length)) / [...el.querySelectorAll('.row')].length * 100) + '%'; el.querySelector('.meta .k').textContent = [...el.querySelectorAll('.row[data-done="true"]')].length; }, 80 * i));
+  setTimeout(() => { btns.forEach(b => { b.classList.remove('busy'); b.classList.add('ok'); b.querySelector('span').textContent = 'Done'; }); syncStack(el); }, 1150);
+}
+
+/* slide to confirm (same as F) */
+stack.addEventListener('pointerdown', e => {
+  const knob = e.target.closest('.slide .knob'); if (!knob) return;
+  const slide = knob.parentElement, item = slide.closest('.item');
+  const k = knob.offsetWidth, max = slide.offsetWidth - k - 8, x0 = e.clientX; let x = 0;
+  slide.classList.remove('snap'); knob.setPointerCapture(e.pointerId);
+  const move = ev => { x = Math.max(0, Math.min(max, ev.clientX - x0)); knob.style.left = (4 + x) + 'px'; slide.querySelector('.fill').style.width = (x + k + 8) + 'px'; slide.querySelector('.txt').style.opacity = 1 - x / max; };
+  const up = () => {
+    knob.removeEventListener('pointermove', move); knob.removeEventListener('pointerup', up); knob.removeEventListener('pointercancel', up);
+    if (x >= max * 0.85 || x < 4) { slide.classList.add('is-done'); knob.style.left = ''; slide.querySelector('.fill').style.width = ''; slide.querySelector('.txt').style.opacity = ''; setTimeout(() => finish(item, byId[item.id].done, [item.id]), 520); }
+    else { slide.classList.add('snap'); knob.style.left = ''; slide.querySelector('.fill').style.width = ''; slide.querySelector('.txt').style.opacity = ''; }
+  };
+  knob.addEventListener('pointermove', move); knob.addEventListener('pointerup', up); knob.addEventListener('pointercancel', up);
+});
+stack.addEventListener('submit', e => { e.preventDefault(); const input = e.target.querySelector('input'); const t = input.value.trim(); if (!t) return; const thread = e.target.closest('.item').querySelector('.thread'); thread.hidden = false; thread.insertAdjacentHTML('beforeend', `<div class="me">${esc(t)}</div>`); input.value=''; setTimeout(()=>thread.insertAdjacentHTML('beforeend', `<div class="ai">Sure, I've adjusted it above.</div>`), 800); });
+document.getElementById('composer').addEventListener('submit', e => { e.preventDefault(); const i = document.getElementById('composerInput'); if (!i.value.trim()) return; i.value=''; i.placeholder='On it…'; setTimeout(()=>{ i.placeholder='Done, anything else?'; setTimeout(()=>i.placeholder='Tell it something…',2500) },900); });
+if (new URLSearchParams(location.search).get('phone')) document.body.classList.add('phone');
+progress();
+
+(() => {
+  const slide = document.getElementById('islide'), knob = document.getElementById('iknob');
+  knob.addEventListener('pointerdown', e => {
+    const max = slide.offsetWidth - knob.offsetWidth - 8, x0 = e.clientX; let x = 0;
+    slide.classList.remove('snap'); knob.setPointerCapture(e.pointerId);
+    const move = ev => { x = Math.max(0, Math.min(max, ev.clientX - x0)); knob.style.left = (4 + x) + 'px'; slide.querySelector('.hint').style.opacity = 1 - x / max; };
+    const up = () => {
+      knob.removeEventListener('pointermove', move); knob.removeEventListener('pointerup', up); knob.removeEventListener('pointercancel', up);
+      slide.classList.add('snap');
+      if (x >= max * 0.8 || x < 4) { slide.classList.add('is-done'); knob.style.left = (4 + max) + 'px'; setTimeout(() => document.body.classList.add('ready'), 260); }
+      else { knob.style.left = ''; slide.querySelector('.hint').style.opacity = ''; }
+    };
+    knob.addEventListener('pointermove', move); knob.addEventListener('pointerup', up); knob.addEventListener('pointercancel', up);
+  });
+})();
+if (new URLSearchParams(location.search).get('skipintro')) document.body.classList.add('ready');
+const blobV = new URLSearchParams(location.search).get('blob'); if (blobV) document.body.dataset.blob = blobV;
+</script>
+</body>
+</html>

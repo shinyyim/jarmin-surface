@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>B · Marginalia</title>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,500;0,8..60,600;1,8..60,400&family=IBM+Plex+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #f7f3ea;
+    --ink: #1c1a16;
+    --ink-2: #625d52;
+    --ink-3: #a09a8c;
+    --line: #e3ddcf;
+    --blue: #1f3fb5;
+    --serif: 'Source Serif 4', Georgia, serif;
+    --sans: 'IBM Plex Sans', system-ui, sans-serif;
+    --gutter: 168px;
+    --col: 880px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0 }
+  body { background: var(--cream); color: var(--ink); font-family: var(--serif); font-size: 17px; line-height: 1.5; -webkit-font-smoothing: antialiased }
+  button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer }
+  input { font: inherit; color: inherit; background: none; border: 0; outline: 0 }
+  .page { max-width: var(--col); margin: 0 auto; padding: 72px 32px 180px }
+  body.phone .page { padding: 28px 18px 120px }
+
+  .label { font-family: var(--sans); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); font-weight: 500 }
+
+  /* Brief: big, with a margin note */
+  .brief { display: grid; grid-template-columns: var(--gutter) 1fr; gap: 24px; margin-bottom: 56px; transition: opacity .3s }
+  body.phone .brief { grid-template-columns: 1fr; gap: 8px; margin-bottom: 32px }
+  .brief.fade { opacity: 0 }
+  .brief .note { padding-top: 10px } body.phone .brief .note { padding-top: 0 }
+  .brief .note .label { display: block; margin-bottom: 4px }
+  .brief .note p { font-family: var(--sans); font-size: 13px; color: var(--ink-2); line-height: 1.45 }
+  .brief h1 { font-size: 34px; font-weight: 400; line-height: 1.18; letter-spacing: -.015em; text-wrap: balance; max-width: 22ch }
+  body.phone .brief h1 { font-size: 26px }
+
+  /* Item: gutter (meta) + main */
+  .item { display: grid; grid-template-columns: var(--gutter) 1fr; gap: 24px; padding: 26px 0; border-top: 1px solid var(--line); transition: opacity .35s }
+  body.phone .item { grid-template-columns: 1fr; gap: 10px; padding: 20px 0 }
+  .item[data-state="gone"] { opacity: 0; max-height: 0; padding: 0; overflow: hidden; border: 0 }
+  .gutter { font-family: var(--sans); font-size: 13px; color: var(--ink-2); line-height: 1.5; padding-top: 5px }
+  body.phone .gutter { display: flex; gap: 10px; align-items: baseline; padding: 0 }
+  .gutter .src { color: var(--ink); font-weight: 500 }
+  .gutter .when { color: var(--ink-3) }
+  .gutter .urg { margin-top: 10px; color: var(--blue); font-weight: 500 }
+  body.phone .gutter .urg { margin: 0; margin-left: auto }
+  .gutter .urg::before { content: "¶ " }
+
+  .main { min-width: 0 }
+  .head { cursor: pointer }
+  .title { font-size: 22px; font-weight: 500; letter-spacing: -.01em; line-height: 1.25 }
+  body.phone .title { font-size: 20px }
+  .why { color: var(--ink-2); margin-top: 6px; font-style: italic; max-width: 56ch }
+  .quick { display: flex; gap: 22px; margin-top: 14px; font-family: var(--sans); font-size: 14px }
+  .item[data-open="true"] .quick { display: none }
+
+  /* Actions: underlined links, blue for the positive one */
+  .act { font-family: var(--sans); font-size: 14px; font-weight: 500; text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1px; text-decoration-color: var(--ink-3); padding: 2px 0 }
+  .act:hover { text-decoration-color: currentColor }
+  .act.primary { color: var(--blue); text-decoration-color: var(--blue) }
+  .act.quiet { color: var(--ink-2); font-weight: 400 }
+
+  .body { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .45s cubic-bezier(.2,.7,.2,1) }
+  .item[data-open="true"] .body { grid-template-rows: 1fr }
+  .body > div { overflow: hidden }
+  .work { margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--ink) }
+  .fields { display: grid; grid-template-columns: max-content 1fr; gap: 2px 14px; font-family: var(--sans); font-size: 13px; margin-bottom: 18px }
+  .fields dt { color: var(--ink-3) } .fields dd { color: var(--ink-2) }
+  .content { white-space: pre-wrap; font-size: 19px; line-height: 1.55; max-width: 60ch }
+  body.phone .content { font-size: 18px }
+  .context { margin-top: 24px; padding-left: 18px; border-left: 2px solid var(--line); color: var(--ink-2); max-width: 56ch; font-size: 16px }
+  .context .label { display: block; margin-bottom: 4px }
+
+  .path { font-family: var(--sans); font-size: 13px; color: var(--ink-2); margin-bottom: 14px }
+  .path span + span::before { content: " › "; color: var(--ink-3) }
+  .change { display: grid; grid-template-columns: 120px 1fr 1fr; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--line); align-items: baseline }
+  body.phone .change { grid-template-columns: 1fr; gap: 2px }
+  .change .f { font-family: var(--sans); font-size: 13px; color: var(--ink-3) }
+  .change .b { color: var(--ink-3); text-decoration: line-through } .change .b.empty { text-decoration: none; font-style: italic }
+  .change .a { font-weight: 600 } .change .a::before { content: "→ "; color: var(--blue); font-weight: 400 }
+
+  .question { font-size: 24px; line-height: 1.25; margin-bottom: 18px; max-width: 30ch; letter-spacing: -.01em }
+  .found { display: grid; grid-template-columns: 130px 1fr; gap: 10px 14px }
+  body.phone .found { grid-template-columns: 1fr; gap: 2px }
+  .found dt { font-family: var(--sans); font-size: 13px; color: var(--ink-3); padding-top: 4px }
+  body.phone .found dt { margin-top: 10px }
+  .found dd.long { grid-column: 1 / -1; padding-left: 18px; border-left: 2px solid var(--line); color: var(--ink-2); font-style: italic; max-width: 56ch }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px 26px; margin-top: 20px }
+
+  .actions { display: flex; flex-wrap: wrap; gap: 8px 26px; align-items: baseline; margin-top: 24px }
+  .actions .spacer { flex: 1 }
+  .reply { margin-top: 16px; border-bottom: 1px solid var(--line); padding: 6px 0; max-width: 60ch; display: flex; gap: 10px }
+  .reply input { flex: 1; font-size: 16px; font-style: italic }
+  .reply input::placeholder { color: var(--ink-3) }
+  .thread { display: flex; flex-direction: column; gap: 6px; margin-top: 14px; font-size: 15px; max-width: 60ch }
+  .thread .me { font-style: italic } .thread .ai { color: var(--ink-2) } .thread .ai::before { content: "— " }
+
+  .item[data-state="done"] .main, .item[data-state="done"] .gutter { display: none }
+  .done { display: none; grid-column: 1 / -1; font-family: var(--sans); font-size: 14px; color: var(--ink-2); gap: 12px; align-items: baseline }
+  .item[data-state="done"] .done { display: flex }
+  .done .done-msg { color: var(--ink) } .done .done-msg::before { content: "✓ " ; color: var(--blue) }
+  .done .undo { margin-left: auto; text-decoration: underline; text-underline-offset: 3px }
+
+  .floor { font-family: var(--sans); font-size: 13px; color: var(--ink-3); padding-top: 20px; border-top: 1px solid var(--line); opacity: 0; transition: opacity .4s; margin-left: calc(var(--gutter) + 24px) }
+  body.phone .floor { margin-left: 0 }
+  .floor.show { opacity: 1 }
+
+  .composer { position: fixed; left: 50%; bottom: 0; transform: translateX(-50%); width: min(var(--col), 100%); padding: 24px 32px 28px; background: linear-gradient(to top, var(--cream) 65%, transparent); pointer-events: none }
+  body.phone .composer { padding: 12px 18px 18px }
+  .composer form { pointer-events: auto; margin-left: calc(var(--gutter) + 24px); border-bottom: 1px solid var(--ink); padding: 8px 0; display: flex; gap: 12px; align-items: baseline }
+  body.phone .composer form { margin-left: 0 }
+  .composer input { flex: 1; font-size: 17px; font-style: italic }
+  .composer input::placeholder { color: var(--ink-3) }
+  .composer .label { white-space: nowrap }
+</style>
+</head>
+<body>
+<main class="page">
+  <header class="brief" id="brief">
+    <div class="note"><span class="label">Wednesday · 08:20</span><p>One of these is due before Thursday.</p></div>
+    <h1>Morning. Three things need you.</h1>
+  </header>
+  <section id="stack"></section>
+  <p class="floor" id="floor">Nothing else. I'll be back if anything comes up.</p>
+</main>
+<div class="composer"><form><span class="label">Tell it</span><input placeholder="something to do…" aria-label="Instruction"></form></div>
+
+<script src="_fixtures.js"></script>
+<script>
+const R = {
+  document: b => `<div class="work"><dl class="fields">${b.fields.map(f=>`<dt>${esc(f.label)}</dt><dd>${esc(f.value)}</dd>`).join('')}</dl><div class="content">${esc(b.content)}</div>${b.context?`<div class="context"><span class="label">${esc(b.context.label)}</span>${esc(b.context.content)}</div>`:''}</div>`,
+  diff: b => `<div class="work"><div class="path">${b.path.map(p=>`<span>${esc(p)}</span>`).join('')}</div>${b.changes.map(c=>`<div class="change"><span class="f">${esc(c.field)}</span><span class="b ${c.before===null?'empty':''}">${c.before===null?'empty':esc(c.before)}</span><span class="a">${esc(c.after)}</span></div>`).join('')}</div>`,
+  evidence: b => `<div class="work"><div class="question">${esc(b.question)}</div><dl class="found">${b.found.map(f=>`<dt>${esc(f.label)}</dt><dd class="${f.long?'long':''}">${esc(f.value)}</dd>`).join('')}</dl>${b.options?`<div class="chips">${b.options.map(o=>`<button class="act primary" data-answer="${esc(o)}">${esc(o)}</button>`).join('')}</div>`:''}</div>`,
+};
+const label = a => ({approve:a.label||'Approve', approveAlways:`Send, and handle ${a.scope} from now on`, edit:'Edit first', discard:'Throw away'}[a.kind]);
+const urg = {now:'Before Thursday', today:'Today', whenever:''};
+document.getElementById('stack').innerHTML = LIGHT_DAY.map(wb=>{
+  const q = wb.body.kind==='evidence' ? `<button class="act primary" data-act="open">Answer</button>` :
+    wb.actions.filter(a=>a.kind==='approve'||a.kind==='edit').map(a=>`<button class="act ${a.kind==='approve'?'primary':'quiet'}" data-act="${a.kind}">${label(a)}</button>`).join('');
+  return `<article class="item" id="${wb.id}" data-urgency="${wb.urgency}" data-open="false" data-state="waiting">
+    <aside class="gutter"><div class="src">${esc(wb.source)}</div><div class="when">${esc(wb.raisedAt)}</div>${urg[wb.urgency]?`<div class="urg">${urg[wb.urgency]}</div>`:''}</aside>
+    <div class="main"><div class="head"><div class="title">${esc(wb.title)}</div><div class="why">${esc(wb.why)}</div><div class="quick">${q}</div></div>
+      <div class="body"><div>${R[wb.body.kind](wb.body)}
+        <div class="actions">${wb.actions.filter(a=>a.kind!=='answer').map(a=>a.kind==='discard'?`<span class="spacer"></span><button class="act quiet" data-act="discard">${label(a)}</button>`:`<button class="act ${a.kind==='edit'?'quiet':'primary'}" data-act="${a.kind}">${label(a)}</button>`).join('')}</div>
+        <div class="thread" hidden></div><form class="reply"><input placeholder="say something about this…"></form></div></div></div>
+    <div class="done"><span class="done-msg"></span><button class="undo">undo</button></div>
+  </article>`;
+}).join('');
+wire({ stack: document.getElementById('stack'), brief: document.getElementById('brief'), floor: document.getElementById('floor'),
+  briefDone: `<div class="note"><span class="label">Wednesday · 08:24</span><p>Friday's report is next.</p></div><h1>That's everything.</h1>` });
+</script>
+</body>
+</html>
