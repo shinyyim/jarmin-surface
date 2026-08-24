@@ -53,7 +53,8 @@ export default function App() {
   // keyboard: J/K move, Enter open, A approve, X discard, U undo, 1-9 answer
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if ((e.target as HTMLElement).matches('input,textarea,[contenteditable="true"]')) return
+      const t = e.target as HTMLElement | null
+      if (t?.matches?.('input,textarea,[contenteditable="true"]')) return
       const waiting = items.filter(w => (st[w.id]?.state ?? 'waiting') === 'waiting')
       const open = waiting.find(w => st[w.id]?.open)
       const focused = document.activeElement?.closest('.item')?.id
