@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { days } from './contract/fixtures'
 import type { WorkBlock } from './contract/work-block'
 import { useSurface } from './state'
-import { Intro, Card, Stack, Bundle, Handoff, Composer, Empty, Skeleton } from './components'
+import { Intro, Card, Stack, Bundle, Handoff, Composer, Empty, Skeleton, DaySwitch } from './components'
 import { isEvidence } from './guards'
 import { greeting, introSub, todayLabel } from './time'
 
@@ -91,6 +91,7 @@ export default function App() {
 
   return (
     <>
+      <DaySwitch day={DAY} />
       {!ready && <Intro sub={c.sub} greeting={c.greeting} onBegin={() => setReady(true)} />}
       <main className="page">
         <div className="top"><h1>Today</h1><span className="date">{today.weekday} <b>· {today.date}</b></span></div>

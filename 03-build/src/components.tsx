@@ -250,6 +250,18 @@ export function Empty({ show, next }: { show: boolean; next: string }) {
   )
 }
 
+/* ---------- Day switch — three things or thirty-one ---------- */
+export function DaySwitch({ day }: { day: 'light' | 'heavy' }) {
+  const q = new URLSearchParams(location.search)
+  const href = (d: string) => { const n = new URLSearchParams(q); n.set('day', d); n.delete('skipintro'); return '?' + n.toString() }
+  return (
+    <nav className="dayswitch" aria-label="Which day">
+      <a href={href('light')} className={day === 'light' ? 'on' : ''} data-tip="A light day, three things" aria-current={day === 'light'}>3</a>
+      <a href={href('heavy')} className={day === 'heavy' ? 'on' : ''} data-tip="A heavy day, thirty-one things" aria-current={day === 'heavy'}>31</a>
+    </nav>
+  )
+}
+
 export function Skeleton() {
   return <div className="skeleton" aria-busy="true" aria-label="Loading"><i /><i /><i /></div>
 }
