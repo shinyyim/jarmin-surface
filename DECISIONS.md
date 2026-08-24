@@ -5,18 +5,14 @@ Every open question gets resolved here rather than deferred. Newest at the botto
 
 ---
 
-### D-001 · Deadline unknown
-**Update 2026-08-24:** due today. Prototype polish folds into the React build; explorations ship as the live HTML pages.
-explorations and Phase 4 build polish absorb any time pressure.
-**Revisit if:** a due date is confirmed.
-
 ### D-002 · Stack — settled
-**Call:** Vite + React + TypeScript + Tailwind. Static fixtures, no backend. Design tokens written
-by hand. shadcn/ui only where accessible behaviour is fiddly (realistically: Collapsible).
-**Why:** Six component types total — too small to justify a component kit. A kit-default
-look reads as generic; Craft is a graded criterion, so that look is a cost, not a saving. What shadcn genuinely buys is focus and keyboard states, which the
-brief grades under "the states that are easy to skip over".
-**Cost:** Hand-writing a few primitives. Cheap at this size.
+**Call:** Vite + React + TypeScript, static fixtures, no backend. Styles are hand-written CSS with
+design tokens at the top, ported from the prototype. No utility framework, no component kit.
+**Why:** Nine components total — too small to justify a kit, and a kit-default look reads as
+generic when craft is being graded. The prototype's CSS was already the design, so porting it kept
+the built surface identical to the designed one.
+**Cost:** Focus rings, keyboard handling and the collapse animation are hand-written. Cheap at this
+size, and it keeps the stylesheet readable end to end.
 
 ### D-003 · Delegation is per scenario, not a global level
 **Call:** Approving offers two buttons — "Yes, this time" and "Yes, always", where *always* carries

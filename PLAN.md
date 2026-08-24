@@ -89,7 +89,7 @@ Each direction gets its own folder under `02-design/explorations/` with a sketch
 ### Phase 4 — Build
 > "Does the surface you built match the surface you designed?"
 
-- [x] Scaffold in `03-build/` — assumed stack: **Vite + React + TypeScript + Tailwind** (revisit before starting)
+- [x] Scaffold in `03-build/` — **Vite + React + TypeScript**, hand-written CSS (see D-002)
 - [x] Fake data in a single fixtures file, shaped exactly like the Work Block schema
 - [x] Renderer registry: `type → component`. Adding a work type = adding one entry, nothing else
 - [x] A deliberately unregistered type in the fixtures, to prove the fallback renders
