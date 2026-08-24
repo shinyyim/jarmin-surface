@@ -256,8 +256,8 @@ export function DaySwitch({ day }: { day: 'light' | 'heavy' }) {
   const href = (d: string) => { const n = new URLSearchParams(q); n.set('day', d); n.delete('skipintro'); return '?' + n.toString() }
   return (
     <nav className="dayswitch" aria-label="Which day">
-      <a href={href('light')} className={day === 'light' ? 'on' : ''} data-tip="A light day, three things" aria-current={day === 'light'}>3</a>
-      <a href={href('heavy')} className={day === 'heavy' ? 'on' : ''} data-tip="A heavy day, thirty-one things" aria-current={day === 'heavy'}>31</a>
+      <a href={href('light')} className={day === 'light' ? 'on' : ''} title="A light day, three things" aria-label="A light day, three things" aria-current={day === 'light'}>3</a>
+      <a href={href('heavy')} className={day === 'heavy' ? 'on' : ''} title="A heavy day, thirty-one things" aria-label="A heavy day, thirty-one things" aria-current={day === 'heavy'}>31</a>
     </nav>
   )
 }
