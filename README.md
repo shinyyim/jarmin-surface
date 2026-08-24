@@ -11,7 +11,7 @@ happens here.
 | `01-research/` | Brief analysis, visual references |
 | `02-design/system/` | The Work Block contract, the primitives, the coverage test |
 | `02-design/` | The person and seven scenarios, the UX structure, what gets built |
-| `02-design/explorations/` | Six visual directions, each a working page. `README.html` is the gallery |
+| `02-design/explorations/` | The directions tried, and why each was dropped. The pages themselves are served from the build |
 | `02-design/final/screens/` | Screens of the chosen design |
 | `03-build/` | The front end. React + TypeScript + Vite. `npm install && npm run dev` |
 | `04-writeup/` | The short notes, and the recording script |
