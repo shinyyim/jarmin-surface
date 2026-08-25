@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { Analytics } from '@vercel/analytics/react'
 import { days } from './contract/fixtures'
 import type { WorkBlock } from './contract/work-block'
 import { useSurface } from './state'
@@ -91,6 +92,7 @@ export default function App() {
 
   return (
     <>
+      <Analytics />
       <DaySwitch day={DAY} />
       {!ready && <Intro sub={c.sub} greeting={c.greeting} onBegin={() => setReady(true)} />}
       <main className="page">
